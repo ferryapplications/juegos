@@ -1,0 +1,2025 @@
+<meta charset="utf-8">
+<title>¿Cuánto Dura?</title>
+<style>
+  :root{
+    --bg: #fbf6ec;
+    --bg-radial: #fff1da;
+    --panel: #ffffff;
+    --panel-edge: #f0e4d0;
+    --card-recessed: #f7efdf;
+    --track-bg: #f0e6d5;
+    --amber: #16bfae;
+    --amber-dim: #d9f5f0;
+    --on-amber: #073b36;
+    --teal: #f2994a;
+    --teal-dim: #fdebd4;
+    --on-teal: #4a2a0a;
+    --orange: #e2703d;
+    --red: #e2574a;
+    --ink: #3a2e1f;
+    --ink-dim: #8a7a63;
+    --ink-faint: #b3a28a;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, var(--bg-radial) 0%, var(--bg) 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    padding-inline: 16px;
+    padding-block: 32px;
+  }
+
+  .stage{
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header-left{ display: flex; align-items: center; gap: 12px; }
+
+  .back-btn{
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .back-btn:hover{ border-color: var(--ink-faint); color: var(--ink); }
+
+  .brand{ display: flex; flex-direction: column; gap: 2px; }
+
+  .eyebrow{
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  h1{
+    margin: 0;
+    font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+    font-size: clamp(20px, 5vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .hud{
+    display: flex;
+    gap: 18px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .hud b{ color: var(--ink); font-weight: 600; }
+
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 22px;
+    padding: 26px 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 14px 32px -20px rgba(58,46,31,0.16);
+  }
+  .panel::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .question{
+    font-size: clamp(18px, 4.4vw, 21px);
+    line-height: 1.4;
+    margin: 0 0 22px;
+    max-width: 46ch;
+    position: relative;
+  }
+
+  /* --- home --- */
+  .streak-strip{
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .streak-chip{
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 18px;
+    padding: 14px;
+    text-align: center;
+  }
+  .streak-chip .n{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--amber);
+    display: block;
+    font-variant-numeric: tabular-nums;
+  }
+  .streak-chip.best .n{ color: var(--teal); }
+  .streak-chip.avg .n{ color: var(--orange); }
+  .home-percentile{ text-align: center; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-dim); margin: -6px 0 6px; }
+  .home-percentile b{ color: var(--ink); }
+  .streak-chip .l{ font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-dim); }
+
+  .mode-card{
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 20px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.08s ease;
+  }
+  .mode-card:hover{ border-color: var(--amber); transform: translateY(-1px); }
+  .mode-card:active{ transform: scale(0.99); }
+
+  .mode-card .mc-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .mode-card .mc-title{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .mode-card .mc-tag{
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    border-radius: 999px;
+    padding: 3px 9px;
+  }
+  .mode-card .mc-desc{ font-size: 13px; color: var(--ink-dim); line-height: 1.5; }
+
+  .link-row{ display: flex; gap: 10px; }
+  .link-card{
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--panel-edge);
+    border-radius: 16px;
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-dim);
+    cursor: pointer;
+  }
+  .link-card:hover{ border-color: var(--amber); color: var(--ink); }
+
+  /* --- category picker --- */
+  .cat-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cat-card{
+    background: var(--card-recessed);
+    border: 1px solid var(--panel-edge);
+    border-radius: 18px;
+    padding: 16px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.08s ease, border-color 0.15s ease;
+  }
+  .cat-card:hover{ transform: translateY(-1px); border-color: var(--amber); }
+  .cat-card .ce{
+    font-size: 19px; display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 50%; margin-bottom: 10px;
+    background: var(--badge-bg, var(--amber-dim));
+  }
+  .cat-card .cn{ font-size: 14px; font-weight: 600; margin-bottom: 2px; display: block; }
+  .cat-card .cc{ font-size: 11px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+  .cat-card.all{ grid-column: 1 / -1; background: var(--amber-dim); border-color: var(--amber); }
+  .cat-card.all .ce{ background: #ffffff; }
+  .cat-card.all .cn, .cat-card.all .cc{ color: var(--on-amber); }
+
+  /* --- entry: unit chips + editable number --- */
+  .unit-chips{ display: flex; justify-content: center; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .unit-chip{
+    flex: 0 0 auto; width: auto; padding: 7px 13px; font-size: 12px;
+    font-family: "IBM Plex Mono", monospace; border-radius: 999px;
+    background: transparent; border: 1px solid var(--panel-edge); color: var(--ink-dim);
+  }
+  .unit-chip.active{ background: var(--amber-dim); color: var(--ink); border-color: var(--amber); }
+
+  .entry{ display: flex; align-items: baseline; justify-content: center; gap: 8px; margin-bottom: 6px; }
+
+  input.num-input{
+    -moz-appearance: textfield; appearance: textfield;
+    background: transparent; border: none; border-bottom: 2px dashed var(--amber-dim);
+    color: var(--amber); text-shadow: 0 0 18px rgba(22,191,174,0.3);
+    font-family: "IBM Plex Mono", monospace; font-size: clamp(38px, 12vw, 52px); font-weight: 600;
+    font-variant-numeric: tabular-nums; text-align: right; width: 6.5ch; padding: 0 2px 4px; outline: none;
+  }
+  input.num-input::-webkit-outer-spin-button, input.num-input::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+  input.num-input:focus{ border-bottom-color: var(--amber); border-bottom-style: solid; }
+  input.num-input.revealed{ color: var(--teal); text-shadow: 0 0 18px rgba(242,153,74,0.3); border-color: transparent; }
+
+  .entry .unit-suffix{ font-family: "IBM Plex Mono", monospace; font-size: clamp(16px, 4vw, 20px); color: var(--ink-dim); font-weight: 500; }
+
+  .hint{ text-align: center; font-size: 12px; color: var(--ink-faint); min-height: 16px; margin-bottom: 26px; font-family: "IBM Plex Mono", monospace; }
+
+  .track{
+    position: relative; height: 10px; border-radius: 999px; background: var(--track-bg);
+    margin: 4px 8px 30px; cursor: pointer; touch-action: none;
+  }
+  .handle{
+    position: absolute; top: 50%; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--amber); border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--amber), 0 4px 10px rgba(58,46,31,0.25);
+    transform: translate(-50%, -50%); cursor: grab; touch-action: none; z-index: 2;
+  }
+  .handle:active{ cursor: grabbing; }
+  .handle:focus-visible{ outline: 2px solid var(--ink); outline-offset: 3px; }
+  .handle.revealed{ background: var(--teal); box-shadow: 0 0 0 2px var(--teal), 0 4px 14px rgba(58,46,31,0.25); }
+
+  button{
+    font-family: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.01em;
+    border: none; border-radius: 14px; padding: 13px 20px; cursor: pointer; width: 100%;
+    transition: transform 0.08s ease, filter 0.15s ease;
+  }
+  button:active{ transform: scale(0.98); }
+  .btn-primary{ background: var(--amber); color: var(--on-amber); }
+  .btn-primary:hover{ filter: brightness(1.08); }
+  .btn-secondary{ background: transparent; border: 1px solid var(--panel-edge); color: var(--ink); }
+  .btn-secondary:hover{ border-color: var(--ink-faint); }
+  .btn-row{ display: flex; gap: 10px; }
+
+  .result{ opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.35s ease 0.15s; }
+  .result.show{ opacity: 1; max-height: 900px; }
+
+  .gauge-wrap{ display: flex; flex-direction: column; align-items: center; margin: 4px 0 14px; }
+  .gauge-svg{ width: 200px; height: 112px; display: block; }
+  .gauge-track{ fill: none; stroke: var(--track-bg); stroke-width: 14; stroke-linecap: round; }
+  .gauge-fill{
+    fill: none; stroke-width: 14; stroke-linecap: round;
+    stroke-dasharray: 220; stroke-dashoffset: 220;
+    transition: stroke-dashoffset 0.9s cubic-bezier(.22,.85,.25,1), stroke 0.4s ease;
+  }
+  .gauge-center{ margin-top: -58px; text-align: center; }
+  .gauge-num{ font-family: "IBM Plex Mono", monospace; font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; display: block; }
+  .gauge-label{ font-size: 12px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-dim); }
+
+  .tone-preciso{ color: var(--teal); }
+  .tone-cerca{ color: var(--amber); }
+  .tone-lejos{ color: var(--orange); }
+  .tone-muylejos{ color: var(--red); }
+
+  .gap-wrap{ margin: 22px 4px 8px; }
+  .gap-ratio{ text-align: center; font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-dim); margin-bottom: 14px; }
+  .gap-ratio b{ color: var(--ink); }
+
+  .gap-track{ position: relative; height: 6px; border-radius: 999px; background: var(--track-bg); margin: 46px 6px 30px; }
+  .gap-fill{
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(to right, var(--amber-dim), var(--teal-dim));
+    border-radius: 999px; transform: scaleX(0); transform-origin: left;
+    transition: transform 0.6s cubic-bezier(.22,.85,.25,1) 0.15s;
+  }
+  .gap-marker{ position: absolute; top: 50%; width: 2px; height: 20px; transform: translate(-50%, -50%); opacity: 0; transition: opacity 0.3s ease; }
+  .gap-marker.show{ opacity: 1; }
+  .gap-marker .dot{ position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--panel); }
+  .gap-marker.guess{ background: var(--amber); }
+  .gap-marker.guess .dot{ background: var(--amber); }
+  .gap-marker.guess .tag{ background: var(--amber); color: var(--on-amber); bottom: auto; top: 16px; }
+  .gap-marker.real{ background: var(--teal); }
+  .gap-marker.real .dot{ background: var(--teal); }
+  .gap-marker.real .tag{ background: var(--teal); color: var(--on-teal); top: -34px; }
+  .gap-marker .tag{ position: absolute; left: 50%; transform: translateX(-50%); font-family: "IBM Plex Mono", monospace; font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; }
+
+  .fact{ font-size: 14px; line-height: 1.55; color: var(--ink-dim); border-left: 2px solid var(--amber-dim); padding-left: 14px; margin: 20px 0 22px; }
+  .fact b{ color: var(--ink); }
+
+  .summary-list{ display: flex; flex-direction: column; gap: 10px; margin: 20px 0 26px; }
+  .summary-row{ display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; padding-bottom: 10px; border-bottom: 1px solid var(--panel-edge); }
+  .summary-row .q{ color: var(--ink-dim); flex: 1; }
+  .summary-row .s{ font-family: "IBM Plex Mono", monospace; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+
+  .result-score{ display: flex; align-items: baseline; gap: 10px; justify-content: center; margin-bottom: 18px; }
+  .result-score .num{ font-family: "IBM Plex Mono", monospace; font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .result-score .label{ font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-dim); }
+
+  /* --- table view --- */
+  .ref-cat{ margin-bottom: 22px; }
+  .ref-cat-title{
+    font-family: "IBM Plex Mono", monospace; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--amber); margin-bottom: 10px;
+  }
+  .ref-row{
+    display: flex; justify-content: space-between; gap: 12px; font-size: 13px;
+    padding: 9px 0; border-bottom: 1px solid var(--panel-edge);
+  }
+  .ref-row .rq{ color: var(--ink-dim); flex: 1; }
+  .ref-row .rv{ font-family: "IBM Plex Mono", monospace; color: var(--teal); font-weight: 600; white-space: nowrap; }
+
+  /* --- faq --- */
+  .faq-block{ margin-bottom: 20px; }
+  .faq-block h3{ font-size: 14px; margin: 0 0 6px; color: var(--amber); }
+  .faq-block p{ font-size: 13px; line-height: 1.6; color: var(--ink-dim); margin: 0; }
+
+  /* --- toast --- */
+  .toast{
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 12px);
+    background: var(--teal); color: var(--on-teal); font-weight: 600; font-size: 13px;
+    padding: 10px 18px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease; z-index: 10;
+  }
+  .toast.show{ opacity: 1; transform: translate(-50%, 0); }
+
+  footer{ text-align: center; font-size: 11px; color: var(--ink-faint); font-family: "IBM Plex Mono", monospace; }
+
+  [hidden]{ display: none !important; }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<div class="stage">
+  <header>
+    <div class="header-left">
+      <button class="back-btn" id="btn-back" hidden>←</button>
+      <div class="brand">
+        <span class="eyebrow" id="eyebrow">Menú</span>
+        <h1>¿Cuánto dura?</h1>
+      </div>
+    </div>
+    <div class="hud" id="hud" hidden>
+      <span>Ronda <b id="hud-round">1</b>/<b id="hud-total">5</b></span>
+      <span>Media <b id="hud-avg">—</b></span>
+    </div>
+  </header>
+
+  <!-- ===== HOME ===== -->
+  <div id="view-home">
+    <div class="streak-strip">
+      <div class="streak-chip"><span class="n" id="home-streak">0</span><span class="l">racha</span></div>
+      <div class="streak-chip best"><span class="n" id="home-best">0</span><span class="l">récord</span></div>
+      <div class="streak-chip avg"><span class="n" id="home-avg">—</span><span class="l">media</span></div>
+    </div>
+    <div class="home-percentile" id="home-percentile" hidden></div>
+
+    <button class="mode-card" id="btn-mode-daily">
+      <div class="mc-top"><span class="mc-title">Modo Diario</span><span class="mc-tag" id="daily-date"></span></div>
+      <div class="mc-desc">5 duraciones, las mismas para todo el mundo hoy. Resetea a medianoche. Mantén tu racha.</div>
+    </button>
+
+    <button class="mode-card" id="btn-mode-unlimited">
+      <div class="mc-top"><span class="mc-title">Modo Ilimitado</span><span class="mc-tag">8 categorías</span></div>
+      <div class="mc-desc">Elige una categoría y juega sin límite, tantas rondas como quieras.</div>
+    </button>
+
+    <div class="link-row">
+      <button class="link-card" id="btn-table">Tabla de referencia</button>
+      <button class="link-card" id="btn-faq">Cómo se juega</button>
+    </div>
+  </div>
+
+  <!-- ===== CATEGORY PICKER ===== -->
+  <div id="view-categories" hidden>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <!-- ===== REFERENCE TABLE ===== -->
+  <div id="view-table" hidden>
+    <div class="panel" id="table-panel"></div>
+  </div>
+
+  <!-- ===== FAQ ===== -->
+  <div id="view-faq" hidden>
+    <div class="panel">
+      <div class="faq-block">
+        <h3>¿Cómo respondo?</h3>
+        <p>Elige la unidad que prefieras (ms, s, min, h, días o años) y escribe el número exacto, o arrastra la barra para tantear rápido. Con Mayús mientras arrastras, el ajuste es más fino.</p>
+      </div>
+      <div class="faq-block">
+        <h3>¿Cómo se puntúa?</h3>
+        <p>La puntuación es logarítmica: acertar con un margen de hasta el 3% te da 100 puntos. Cuanto más te alejes, menos puntos ganas, y un error de 6× (el doble tres veces, o la mitad tres veces) te deja a 0. Sobrestimar y subestimar penalizan igual.</p>
+      </div>
+      <div class="faq-block">
+        <h3>Modo Diario</h3>
+        <p>Cada día tiene las mismas 5 preguntas para todo el mundo, elegidas automáticamente y reseteadas a medianoche de tu dispositivo. Jugar todos los días mantiene tu racha; saltarte un día la reinicia.</p>
+      </div>
+      <div class="faq-block">
+        <h3>Datos</h3>
+        <p>Todas las duraciones están revisadas a mano contra fuentes reales. La racha y el récord se guardan solo en este navegador: no hay cuentas ni servidores.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PLAY ===== -->
+  <div id="view-play" hidden>
+    <div class="panel" id="panel-play">
+      <p class="question" id="question"></p>
+
+      <div class="unit-chips" id="unit-chips"></div>
+
+      <div class="entry">
+        <input class="num-input" id="num-input" type="number" inputmode="decimal" step="any" value="1">
+        <span class="unit-suffix" id="unit-suffix"></span>
+      </div>
+      <div class="hint" id="hint">Escribe el número exacto, o arrastra la barra (May = más preciso)</div>
+
+      <div class="track" id="track" tabindex="0">
+        <div class="handle" id="handle"></div>
+      </div>
+
+      <button class="btn-primary" id="btn-check">Comprobar</button>
+
+      <div class="result" id="panel-result">
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 112">
+            <path class="gauge-track" d="M 26 102 A 74 74 0 0 1 174 102"></path>
+            <path class="gauge-fill" id="gauge-fill" d="M 26 102 A 74 74 0 0 1 174 102"></path>
+          </svg>
+          <div class="gauge-center">
+            <span class="gauge-num" id="gauge-num">0</span>
+            <span class="gauge-label" id="gauge-label">puntos</span>
+          </div>
+        </div>
+
+        <div class="gap-wrap">
+          <div class="gap-ratio" id="gap-ratio"></div>
+          <div class="gap-track" id="gap-track">
+            <div class="gap-fill" id="gap-fill"></div>
+            <div class="gap-marker guess" id="gap-guess"><span class="dot"></span><span class="tag" id="gap-guess-tag"></span></div>
+            <div class="gap-marker real" id="gap-real"><span class="dot"></span><span class="tag" id="gap-real-tag"></span></div>
+          </div>
+        </div>
+
+        <p class="fact" id="fact"></p>
+        <button class="btn-primary" id="btn-next">Siguiente ronda</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== END ===== -->
+  <div id="view-end" hidden>
+    <div class="panel">
+      <div class="result-score">
+        <span class="num" id="end-num">0</span>
+        <span class="label">puntuación media</span>
+      </div>
+
+      <div class="streak-strip" id="end-streak-strip" hidden>
+        <div class="streak-chip"><span class="n" id="end-streak">0</span><span class="l">racha</span></div>
+        <div class="streak-chip best"><span class="n" id="end-best">0</span><span class="l">récord</span></div>
+      </div>
+      <div class="gap-ratio" id="end-percentile" hidden style="margin:0 0 18px;"></div>
+
+      <div class="summary-list" id="summary-list"></div>
+
+      <div class="btn-row" id="end-buttons"></div>
+    </div>
+  </div>
+
+  <footer>datos reales revisados a mano · sin cuentas ni anuncios</footer>
+</div>
+
+<div class="toast" id="toast">Copiado</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ================= DATA ================= */
+  var CATEGORIES = [
+    { id: "body", label: "Cuerpo humano", emoji: "🫀" },
+    { id: "animals", label: "Animales", emoji: "🐋" },
+    { id: "space", label: "Espacio", emoji: "🪐" },
+    { id: "culture", label: "Récords y cultura", emoji: "🏁" },
+    { id: "history", label: "Historia", emoji: "📜" },
+    { id: "tech", label: "Tecnología", emoji: "💻" },
+    { id: "nature", label: "Naturaleza y Tierra", emoji: "🌋" },
+    { id: "sports", label: "Deporte", emoji: "🏆" }
+  ];
+
+  var ROUNDS = [
+    { id: "blink", cat: "body", question: "¿Cuánto dura un parpadeo humano?", real: 0.3, displayUnit: "ms",
+      fact: "Un parpadeo dura entre 100 y 400 milisegundos, unos <b>300 ms</b> de media: casi imperceptible, aunque cierras los ojos miles de veces al día." },
+    { id: "nail", cat: "body", question: "¿Cuánto tarda una uña en crecer 1 milímetro?", real: 864000, displayUnit: "day",
+      fact: "Las uñas de las manos crecen unos 3 mm al mes, así que 1 mm tarda aproximadamente <b>10 días</b>." },
+    { id: "redblood", cat: "body", question: "¿Cuánto vive un glóbulo rojo humano?", real: 10368000, displayUnit: "day",
+      fact: "Un glóbulo rojo circula unos <b>120 días</b> antes de ser reciclado por el bazo y el hígado." },
+    { id: "hummingbird", cat: "animals", question: "¿Cuánto dura un solo aleteo de un colibrí?", real: 0.02, displayUnit: "ms",
+      fact: "Un colibrí puede batir las alas hasta 50 veces por segundo: cada aleteo individual dura solo unos <b>20 ms</b>." },
+    { id: "whale", cat: "animals", question: "¿Cuánto dura un latido del corazón de una ballena azul en su punto más lento, buceando?", real: 30, displayUnit: "s",
+      fact: "En inmersión profunda, el corazón de una ballena azul puede latir solo 2 veces por minuto: cada latido dura cerca de <b>30 segundos</b>." },
+    { id: "elephant", cat: "animals", question: "¿Cuánto dura la gestación de una elefanta?", real: 57024000, displayUnit: "day",
+      fact: "El embarazo de una elefanta dura unos 22 meses, <b>660 días</b>: la gestación más larga de cualquier mamífero terrestre." },
+    { id: "sunlight", cat: "space", question: "¿Cuánto tarda la luz del Sol en llegar a la Tierra?", real: 500, displayUnit: "min",
+      fact: "La luz viaja a 300.000 km/s y aun así tarda <b>8 minutos y 20 segundos</b> en cruzar los 150 millones de km hasta la Tierra." },
+    { id: "venus", cat: "space", question: "¿Cuánto dura un día en Venus, una vuelta completa sobre su propio eje?", real: 20995200, displayUnit: "day",
+      fact: "Venus gira tan despacio que un día venusiano (<b>243 días</b> terrestres) dura más que su propio año, de 225 días." },
+    { id: "proxima", cat: "space", question: "¿Cuánto tarda la luz en llegar desde la estrella más cercana al Sol (Próxima Centauri)?", real: 134039000, displayUnit: "year",
+      fact: "Próxima Centauri está a 4,25 años luz: la distancia estelar más cercana tras el propio Sol, y aun así la luz tarda más de <b>4 años</b> en llegar." },
+    { id: "song", cat: "culture", question: "¿Cuánto dura de media una canción en las listas de éxito actuales?", real: 210, displayUnit: "min",
+      fact: "La duración media de un single de éxito ronda hoy los <b>3 minutos y 30 segundos</b>, cada vez más corta que hace unas décadas." },
+    { id: "flight", cat: "culture", question: "¿Cuánto dura el vuelo comercial sin escalas más largo del mundo?", real: 67200, displayUnit: "h",
+      fact: "El trayecto directo Singapur–Nueva York de Singapore Airlines dura cerca de <b>18 horas y 40 minutos</b> sin escalas: el más largo del mundo." },
+    { id: "pitstop", cat: "culture", question: "¿Cuánto dura una parada en boxes en la Fórmula 1 actual?", real: 2.3, displayUnit: "s",
+      fact: "Los mejores equipos de F1 cambian los cuatro neumáticos en poco más de <b>2 segundos</b>." },
+    { id: "ad", cat: "culture", question: "¿Cuánto dura de media un anuncio de televisión?", real: 30, displayUnit: "s",
+      fact: "Los anuncios de televisión duran mayoritariamente <b>30 segundos</b>: el estándar de la industria desde los años 60." },
+    { id: "heartbeat", cat: "body", question: "¿Cuánto dura un latido del corazón humano en reposo?", real: 0.86, displayUnit: "ms",
+      fact: "En reposo, el corazón late unas 70 veces por minuto: cada latido dura en torno a <b>860 milisegundos</b>." },
+    { id: "breathcycle", cat: "body", question: "¿Cuánto dura un ciclo completo de respiración en reposo?", real: 4, displayUnit: "s",
+      fact: "En reposo respiramos entre 12 y 16 veces por minuto: cada ciclo de inhalar y exhalar dura unos <b>4 segundos</b>." },
+    { id: "sneeze", cat: "body", question: "¿Cuánto dura un estornudo?", real: 0.15, displayUnit: "ms",
+      fact: "Un estornudo completo dura solo entre 100 y 200 milisegundos: unos <b>150 ms</b>." },
+    { id: "hiccup", cat: "body", question: "¿Cuánto dura el espasmo de un solo hipo?", real: 0.5, displayUnit: "ms",
+      fact: "Cada contracción del diafragma que provoca un hipo dura apenas <b>500 milisegundos</b>, medio segundo." },
+    { id: "remcycle", cat: "body", question: "¿Cuánto dura un ciclo completo de sueño, incluida la fase REM?", real: 5400, displayUnit: "min",
+      fact: "El sueño humano se organiza en ciclos de unos <b>90 minutos</b>, alternando fases profundas y REM." },
+    { id: "yawn", cat: "body", question: "¿Cuánto dura un bostezo?", real: 6, displayUnit: "s",
+      fact: "Un bostezo completo, desde que se abre la boca hasta que se cierra, dura unos <b>6 segundos</b>." },
+    { id: "stomachempty", cat: "body", question: "¿Cuánto tarda el estómago en vaciarse tras una comida normal?", real: 14400, displayUnit: "h",
+      fact: "Tras comer, el estómago tarda entre 2 y 4 horas en vaciarse: unas <b>4 horas</b> de media." },
+    { id: "fulldigestion", cat: "body", question: "¿Cuánto tarda la comida en completar todo el tránsito digestivo?", real: 118800, displayUnit: "h",
+      fact: "Desde que comes hasta que se expulsan los restos, el tránsito digestivo completo tarda de media unas <b>33 horas</b>." },
+    { id: "skinrenewal", cat: "body", question: "¿Cada cuánto se renueva por completo la capa externa de la piel?", real: 2332800, displayUnit: "day",
+      fact: "La epidermis se renueva por completo cada <b>27 días</b> aproximadamente." },
+    { id: "nailfull", cat: "body", question: "¿Cuánto tarda una uña de la mano en regenerarse por completo, de raíz a punta?", real: 15552000, displayUnit: "day",
+      fact: "Una uña de la mano tarda de media unos <b>180 días</b> (6 meses) en crecer por completo." },
+    { id: "toenailfull", cat: "body", question: "¿Cuánto tarda una uña del pie en regenerarse por completo?", real: 39447000, displayUnit: "year",
+      fact: "Las uñas de los pies crecen mucho más despacio que las de las manos: tardan de media unos <b>15 meses</b> en renovarse del todo." },
+    { id: "tastebuds", cat: "body", question: "¿Cada cuánto se regeneran las papilas gustativas?", real: 864000, displayUnit: "day",
+      fact: "Las papilas gustativas se renuevan cada <b>10 días</b> aproximadamente." },
+    { id: "bonefracture", cat: "body", question: "¿Cuánto tarda en soldar una fractura ósea simple?", real: 3628800, displayUnit: "day",
+      fact: "Una fractura simple tarda de media <b>6 semanas</b> (42 días) en soldar lo suficiente para cargar peso." },
+    { id: "commoncold", cat: "body", question: "¿Cuánto dura de media un resfriado común?", real: 691200, displayUnit: "day",
+      fact: "Un resfriado común dura de media entre 7 y 10 días: unos <b>8 días</b>." },
+    { id: "reactiontime", cat: "body", question: "¿Cuánto tarda el cerebro humano en reaccionar a un estímulo visual simple?", real: 0.25, displayUnit: "ms",
+      fact: "El tiempo de reacción humano medio ante un estímulo visual simple es de unos <b>250 milisegundos</b>." },
+    { id: "spermlife", cat: "body", question: "¿Cuánto puede sobrevivir un espermatozoide dentro del cuerpo?", real: 432000, displayUnit: "day",
+      fact: "Un espermatozoide puede sobrevivir hasta <b>5 días</b> en el aparato reproductor femenino, esperando la ovulación." },
+    { id: "eggviable", cat: "body", question: "¿Cuánto tiempo es fecundable un óvulo tras la ovulación?", real: 86400, displayUnit: "h",
+      fact: "Tras la ovulación, el óvulo solo puede ser fecundado durante unas <b>24 horas</b>." },
+    { id: "pregnancy", cat: "body", question: "¿Cuánto dura de media un embarazo humano, desde la última regla?", real: 24192000, displayUnit: "day",
+      fact: "Un embarazo a término dura de media <b>280 días</b> (40 semanas) desde la última menstruación." },
+    { id: "hairgrowcm", cat: "body", question: "¿Cuánto tarda el cabello humano en crecer 1 centímetro?", real: 2592000, displayUnit: "day",
+      fact: "El cabello crece una media de 1 cm al mes: un centímetro tarda unos <b>30 días</b>." },
+    { id: "skeletonrenew", cat: "body", question: "¿Cada cuánto se renueva casi por completo el esqueleto humano adulto?", real: 315576000, displayUnit: "year",
+      fact: "El tejido óseo se remodela constantemente: el esqueleto humano se renueva casi del todo cada <b>10 años</b>." },
+    { id: "liverregen", cat: "body", question: "¿Cuánto tarda el hígado en regenerar buena parte de su masa perdida?", real: 1814400, displayUnit: "day",
+      fact: "El hígado es el único órgano que se regenera de forma notable: recupera buena parte de su masa en unas <b>3 semanas</b>." },
+    { id: "celldivision", cat: "body", question: "¿Cuánto dura el ciclo completo de división de una célula humana típica?", real: 86400, displayUnit: "h",
+      fact: "El ciclo celular completo de una célula humana típica dura alrededor de <b>24 horas</b>." },
+    { id: "waterbladder", cat: "body", question: "¿Cuánto tarda el agua que bebes en empezar a llegar a la vejiga?", real: 600, displayUnit: "min",
+      fact: "El agua que bebes puede empezar a llegar a la vejiga en tan solo <b>10 minutos</b>." },
+    { id: "adrenaline", cat: "body", question: "¿Cuánto pueden durar los efectos de un pico de adrenalina en el cuerpo?", real: 3600, displayUnit: "h",
+      fact: "Los efectos de una descarga de adrenalina, como el pulso acelerado, pueden notarse hasta <b>1 hora</b> después." },
+    { id: "tearsbreak", cat: "body", question: "¿Cuánto tarda en romperse la película de lágrimas si no parpadeas?", real: 10, displayUnit: "s",
+      fact: "Sin parpadear, la fina capa de lágrimas que cubre el ojo se rompe en unos <b>10 segundos</b>." },
+    { id: "menstrual", cat: "body", question: "¿Cuánto dura de media un ciclo menstrual?", real: 2419200, displayUnit: "day",
+      fact: "Un ciclo menstrual dura de media <b>28 días</b>, aunque varía bastante entre personas." },
+    { id: "fetalheart", cat: "body", question: "¿Cuánto dura un latido del corazón fetal, más rápido que el de un adulto?", real: 0.4, displayUnit: "ms",
+      fact: "El corazón de un feto late hasta 160 veces por minuto: cada latido dura en torno a <b>400 ms</b>." },
+    { id: "sunburnheal", cat: "body", question: "¿Cuánto tarda en curarse una quemadura solar leve?", real: 518400, displayUnit: "day",
+      fact: "Una quemadura solar leve suele curarse en unos <b>6 días</b>, aunque la piel puede tardar semanas en regenerarse del todo." },
+    { id: "soreness", cat: "body", question: "¿Cuánto duran las agujetas tras un ejercicio intenso poco habitual?", real: 259200, displayUnit: "day",
+      fact: "Las agujetas (dolor muscular de aparición tardía) suelen durar entre 2 y 4 días: unos <b>3 días</b> de media." },
+    { id: "coughreflex", cat: "body", question: "¿Cuánto dura un solo golpe de tos?", real: 1, displayUnit: "s",
+      fact: "Un golpe de tos aislado dura apenas <b>1 segundo</b>, aunque puede expulsar aire a más de 100 km/h." },
+    { id: "mayfly", cat: "animals", question: "¿Cuánto vive una efímera adulta, el insecto con vida adulta más corta?", real: 86400, displayUnit: "h",
+      fact: "Muchas efímeras adultas viven menos de un día: en algunas especies, apenas <b>24 horas</b>." },
+    { id: "tortoiselife", cat: "animals", question: "¿Cuánto puede vivir una tortuga gigante de Galápagos?", real: 4733640000, displayUnit: "year",
+      fact: "Las tortugas gigantes de Galápagos pueden vivir más de <b>150 años</b>." },
+    { id: "mouseheart", cat: "animals", question: "¿Cuánto dura un latido del corazón de un ratón, mucho más rápido que el humano?", real: 0.1, displayUnit: "ms",
+      fact: "El corazón de un ratón late hasta 600 veces por minuto: cada latido dura solo unos <b>100 milisegundos</b>." },
+    { id: "hummingheart", cat: "animals", question: "¿Cuánto dura un latido del corazón de un colibrí en pleno vuelo?", real: 0.05, displayUnit: "ms",
+      fact: "En pleno vuelo, el corazón de un colibrí puede superar los 1.200 latidos por minuto: cada uno dura unos <b>50 ms</b>." },
+    { id: "elephantheart", cat: "animals", question: "¿Cuánto dura un latido del corazón de un elefante?", real: 2, displayUnit: "s",
+      fact: "El corazón de un elefante late muy despacio, unas 30 veces por minuto: cada latido dura unos <b>2 segundos</b>." },
+    { id: "whalegest", cat: "animals", question: "¿Cuánto dura la gestación de una ballena azul?", real: 28512000, displayUnit: "day",
+      fact: "Una ballena azul gesta a su cría durante 10-11 meses: unos <b>330 días</b>." },
+    { id: "bearhibernate", cat: "animals", question: "¿Cuánto puede durar la hibernación de un oso?", real: 15552000, displayUnit: "day",
+      fact: "Un oso puede hibernar hasta <b>180 días</b> (6 meses) sin comer, beber ni salir de su madriguera." },
+    { id: "cicadaground", cat: "animals", question: "¿Cuánto pasan bajo tierra las cigarras periódicas antes de emerger?", real: 536479200, displayUnit: "year",
+      fact: "Algunas cigarras periódicas viven bajo tierra como ninfas durante <b>17 años</b> antes de emerger a la superficie." },
+    { id: "octopuslife", cat: "animals", question: "¿Cuánto vive de media un pulpo común?", real: 47336400, displayUnit: "year",
+      fact: "La mayoría de los pulpos viven muy poco para ser tan inteligentes: apenas <b>1 año y medio</b> de media." },
+    { id: "housefly", cat: "animals", question: "¿Cuánto vive una mosca doméstica adulta?", real: 2419200, displayUnit: "day",
+      fact: "Una mosca doméstica adulta vive de media unos <b>28 días</b>." },
+    { id: "doggest", cat: "animals", question: "¿Cuánto dura la gestación de una perra?", real: 5443200, displayUnit: "day",
+      fact: "El embarazo de una perra dura de media <b>63 días</b>, unas 9 semanas." },
+    { id: "catgest", cat: "animals", question: "¿Cuánto dura la gestación de una gata?", real: 5529600, displayUnit: "day",
+      fact: "El embarazo de una gata dura de media <b>64 días</b>, muy similar al de una perra." },
+    { id: "chickenincub", cat: "animals", question: "¿Cuánto tarda en incubarse un huevo de gallina?", real: 1814400, displayUnit: "day",
+      fact: "Un huevo de gallina fecundado tarda <b>21 días</b> exactos en incubarse hasta la eclosión." },
+    { id: "beeworker", cat: "animals", question: "¿Cuánto vive una abeja obrera en verano?", real: 3628800, displayUnit: "day",
+      fact: "En temporada alta, una abeja obrera se agota trabajando y vive apenas <b>6 semanas</b> (42 días)." },
+    { id: "queenbee", cat: "animals", question: "¿Cuánto puede vivir una abeja reina?", real: 94672800, displayUnit: "year",
+      fact: "Mientras las obreras viven semanas, una abeja reina puede vivir hasta <b>3 años</b> o más." },
+    { id: "antqueen", cat: "animals", question: "¿Cuánto puede vivir una hormiga reina?", real: 946728000, displayUnit: "year",
+      fact: "Algunas hormigas reina pueden vivir hasta <b>30 años</b>, una eternidad para un insecto." },
+    { id: "koalasleep", cat: "animals", question: "¿Cuántas horas al día duerme de media un koala?", real: 72000, displayUnit: "h",
+      fact: "Los koalas duermen hasta <b>20 horas</b> al día: su dieta de eucalipto apenas les da energía." },
+    { id: "slothsleep", cat: "animals", question: "¿Cuántas horas al día duerme un perezoso en libertad?", real: 36000, displayUnit: "h",
+      fact: "Contra el mito popular, en libertad los perezosos duermen 'solo' unas <b>10 horas</b> al día." },
+    { id: "giraffesleep", cat: "animals", question: "¿Cuánto duerme al día una jirafa, en total?", real: 1800, displayUnit: "min",
+      fact: "Las jirafas duermen muy poco: apenas <b>30 minutos</b> repartidos a lo largo del día y la noche." },
+    { id: "elephantsleep", cat: "animals", question: "¿Cuánto duerme al día un elefante salvaje?", real: 7200, displayUnit: "h",
+      fact: "Los elefantes salvajes son de los mamíferos que menos duermen: apenas <b>2 horas</b> al día." },
+    { id: "cheetahsprint", cat: "animals", question: "¿Cuánto tiempo puede mantener un guepardo su velocidad máxima?", real: 25, displayUnit: "s",
+      fact: "Un guepardo no puede mantener su velocidad máxima más de <b>25 segundos</b> antes de sobrecalentarse." },
+    { id: "dogfishgest", cat: "animals", question: "¿Cuánto dura la gestación de la mielga, un tiburón común?", real: 63115200, displayUnit: "year",
+      fact: "La mielga o galludo tiene una de las gestaciones más largas del reino animal: hasta <b>2 años</b>." },
+    { id: "albatrosflight", cat: "animals", question: "¿Cuánto puede volar un albatros viajero sin posarse?", real: 864000, displayUnit: "day",
+      fact: "Un albatros viajero puede permanecer en vuelo continuo hasta <b>10 días</b> seguidos sin tocar tierra." },
+    { id: "penguinincub", cat: "animals", question: "¿Cuánto dura la incubación de un huevo de pingüino emperador?", real: 5616000, displayUnit: "day",
+      fact: "El macho de pingüino emperador incuba el huevo sobre sus patas durante unos <b>65 días</b> en pleno invierno antártico." },
+    { id: "salmonmigrate", cat: "animals", question: "¿Cuánto puede durar la migración de un salmón río arriba para desovar?", real: 1814400, displayUnit: "day",
+      fact: "Nadar y saltar río arriba contra corriente para desovar puede llevarle al salmón unas <b>3 semanas</b>." },
+    { id: "tardigrade", cat: "animals", question: "¿Cuánto pueden sobrevivir los tardígrados en animación suspendida sin agua?", real: 315576000, displayUnit: "year",
+      fact: "Los tardígrados pueden entrar en criptobiosis y sobrevivir así hasta <b>10 años</b> sin una gota de agua." },
+    { id: "batlife", cat: "animals", question: "¿Cuánto puede vivir un murciélago pequeño en libertad?", real: 631152000, displayUnit: "year",
+      fact: "Pese a su tamaño diminuto, algunos murciélagos pueden vivir más de <b>20 años</b> en libertad." },
+    { id: "snailhibernate", cat: "animals", question: "¿Cuánto puede durar la hibernación de un caracol?", real: 10368000, displayUnit: "day",
+      fact: "Algunos caracoles pueden hibernar o estivar sellando su concha durante <b>120 días</b> seguidos o más." },
+    { id: "wolfgest", cat: "animals", question: "¿Cuánto dura la gestación de una loba?", real: 5443200, displayUnit: "day",
+      fact: "La gestación de una loba dura unos <b>63 días</b>, prácticamente igual que la de un perro doméstico." },
+    { id: "parrotlife", cat: "animals", question: "¿Cuánto puede vivir un guacamayo en cautividad?", real: 1577880000, displayUnit: "year",
+      fact: "Los guacamayos grandes pueden vivir más de <b>50 años</b> en cautividad, tanto como una persona." },
+    { id: "issorbit", cat: "space", question: "¿Cuánto tarda la Estación Espacial Internacional en dar una vuelta a la Tierra?", real: 5520, displayUnit: "min",
+      fact: "La ISS orbita a más de 27.000 km/h y completa una vuelta a la Tierra cada <b>92 minutos</b>." },
+    { id: "moonorbit", cat: "space", question: "¿Cuánto tarda la Luna en dar una vuelta orbital completa a la Tierra?", real: 2360448, displayUnit: "day",
+      fact: "La Luna completa su órbita real (sideral) alrededor de la Tierra en <b>27,3 días</b>." },
+    { id: "synodicmonth", cat: "space", question: "¿Cuánto dura un mes lunar completo, de luna nueva a luna nueva?", real: 2551392, displayUnit: "day",
+      fact: "El mes sinódico, de luna nueva a luna nueva, dura <b>29,5 días</b>: algo más que la vuelta orbital real de la Luna." },
+    { id: "marsday", cat: "space", question: "¿Cuánto dura un día en Marte?", real: 88776, displayUnit: "h",
+      fact: "Un día marciano (un 'sol') dura <b>24 horas y 40 minutos</b>, muy parecido al terrestre." },
+    { id: "marsyear", cat: "space", question: "¿Cuánto dura un año en Marte?", real: 59356800, displayUnit: "year",
+      fact: "Marte tarda <b>687 días</b> terrestres en completar su órbita: casi el doble que la Tierra." },
+    { id: "jupiterday", cat: "space", question: "¿Cuánto dura un día en Júpiter, el planeta que gira más rápido?", real: 35748, displayUnit: "h",
+      fact: "Pese a ser el planeta más grande, Júpiter gira tan rápido que un día allí dura solo <b>9 horas y 56 minutos</b>." },
+    { id: "jupiteryear", cat: "space", question: "¿Cuánto dura un año en Júpiter?", real: 374273136, displayUnit: "year",
+      fact: "Júpiter tarda casi <b>12 años</b> terrestres en completar una vuelta al Sol." },
+    { id: "mercuryyear", cat: "space", question: "¿Cuánto dura un año en Mercurio, el planeta más cercano al Sol?", real: 7603200, displayUnit: "day",
+      fact: "Mercurio completa su órbita alrededor del Sol en solo <b>88 días</b>." },
+    { id: "mercuryday", cat: "space", question: "¿Cuánto dura un día solar completo en Mercurio?", real: 15206400, displayUnit: "day",
+      fact: "Por su lenta rotación y rápida órbita, un día solar en Mercurio (de amanecer a amanecer) dura <b>176 días</b> terrestres." },
+    { id: "neptuneyear", cat: "space", question: "¿Cuánto dura un año en Neptuno?", real: 5200692480, displayUnit: "year",
+      fact: "Neptuno tarda casi <b>165 años</b> terrestres en dar una vuelta al Sol: desde su descubrimiento en 1846 no ha completado ni una órbita más." },
+    { id: "moonlight", cat: "space", question: "¿Cuánto tarda la luz reflejada de la Luna en llegar a la Tierra?", real: 1.28, displayUnit: "s",
+      fact: "La luz que refleja la Luna tarda poco más de <b>1 segundo</b> en llegar hasta nosotros." },
+    { id: "marslight", cat: "space", question: "¿Cuánto tarda de media la luz en llegar de Marte a la Tierra?", real: 750, displayUnit: "min",
+      fact: "Según la posición orbital, la luz tarda de media unos <b>12 minutos y medio</b> en viajar de Marte a la Tierra." },
+    { id: "voyagersignal", cat: "space", question: "¿Cuánto tarda hoy una señal de radio en llegar de la sonda Voyager 1 a la Tierra?", real: 82800, displayUnit: "h",
+      fact: "La Voyager 1, el objeto humano más lejano, está tan lejos que su señal tarda cerca de <b>23 horas</b> en llegar a la Tierra." },
+    { id: "sungalacticorbit", cat: "space", question: "¿Cuánto tarda el Sol en completar una vuelta alrededor del centro de la Vía Láctea?", real: 7258248000000000, displayUnit: "year",
+      fact: "El Sistema Solar tarda unos <b>230 millones de años</b> en completar una órbita alrededor del centro de la Vía Láctea: un 'año galáctico'." },
+    { id: "lunareclipse", cat: "space", question: "¿Cuánto puede durar la totalidad de un eclipse lunar total?", real: 6300, displayUnit: "h",
+      fact: "La fase de totalidad de un eclipse lunar total puede durar hasta <b>1 hora y 45 minutos</b>." },
+    { id: "solareclipse", cat: "space", question: "¿Cuánto puede durar como máximo la totalidad de un eclipse solar total?", real: 450, displayUnit: "min",
+      fact: "La totalidad de un eclipse solar total dura como máximo unos <b>7 minutos y medio</b>." },
+    { id: "apollotransit", cat: "space", question: "¿Cuánto tardó el Apolo 11 en viajar de la Tierra a la Luna?", real: 259200, displayUnit: "day",
+      fact: "El viaje del Apolo 11 desde la Tierra hasta la órbita lunar duró unos <b>3 días</b>." },
+    { id: "isbuild", cat: "space", question: "¿Cuánto tardó en construirse la Estación Espacial Internacional en órbita?", real: 410248800, displayUnit: "year",
+      fact: "El ensamblaje de la ISS en órbita, módulo a módulo, se prolongó durante <b>13 años</b>, de 1998 a 2011." },
+    { id: "curiositylanding", cat: "space", question: "¿Cuánto duró la secuencia de aterrizaje del rover Curiosity en Marte, los '7 minutos de terror'?", real: 420, displayUnit: "min",
+      fact: "La secuencia de descenso y aterrizaje del rover Curiosity en Marte duró exactamente unos <b>7 minutos</b>, sin margen para errores." },
+    { id: "halleyscomet", cat: "space", question: "¿Cada cuánto pasa cerca de la Tierra el cometa Halley?", real: 2398377600, displayUnit: "year",
+      fact: "El cometa Halley completa su órbita y vuelve a ser visible desde la Tierra cada <b>76 años</b> aproximadamente." },
+    { id: "pulsarspin", cat: "space", question: "¿Cuánto dura una rotación de uno de los púlsares más rápidos conocidos?", real: 1.4, displayUnit: "ms",
+      fact: "El púlsar más rápido conocido gira sobre sí mismo más de 700 veces por segundo: cada rotación dura apenas <b>1,4 milisegundos</b>." },
+    { id: "universeage", cat: "space", question: "¿Cuál es la edad estimada del universo?", real: 435494880000000000, displayUnit: "year",
+      fact: "Según el modelo cosmológico estándar, el universo tiene unos <b>13.800 millones de años</b>." },
+    { id: "earthage", cat: "space", question: "¿Cuál es la edad estimada de la Tierra?", real: 143271504000000000, displayUnit: "year",
+      fact: "La Tierra se formó hace unos <b>4.540 millones de años</b>, a partir del disco de gas y polvo que rodeaba al joven Sol." },
+    { id: "andromedalight", cat: "space", question: "¿Cuánto tarda la luz en llegar desde la galaxia de Andrómeda?", real: 78894000000000, displayUnit: "year",
+      fact: "La galaxia de Andrómeda, la más cercana a la nuestra similar en tamaño, está tan lejos que su luz tarda <b>2,5 millones de años</b> en llegar." },
+    { id: "galacticcenterlight", cat: "space", question: "¿Cuánto tarda la luz en llegar desde el centro de la Vía Láctea hasta la Tierra?", real: 820497600000, displayUnit: "year",
+      fact: "El centro de nuestra propia galaxia está tan lejos que su luz tarda unos <b>26.000 años</b> en llegar hasta nosotros." },
+    { id: "venusyear", cat: "space", question: "¿Cuánto dura un año en Venus?", real: 19440000, displayUnit: "day",
+      fact: "Venus completa su órbita alrededor del Sol en <b>225 días</b> terrestres." },
+    { id: "movieavg", cat: "culture", question: "¿Cuánto dura de media un largometraje de cine comercial?", real: 6600, displayUnit: "min",
+      fact: "El metraje medio de una película comercial actual ronda las <b>110 minutos</b>, casi dos horas." },
+    { id: "trailer", cat: "culture", question: "¿Cuánto dura de media el tráiler de una película?", real: 150, displayUnit: "min",
+      fact: "Un tráiler de cine estándar dura de media unos <b>2 minutos y medio</b>." },
+    { id: "anthem", cat: "culture", question: "¿Cuánto dura de media un himno nacional?", real: 90, displayUnit: "min",
+      fact: "Un himno nacional dura de media alrededor de <b>90 segundos</b> en su versión instrumental completa." },
+    { id: "shortestflight", cat: "culture", question: "¿Cuánto dura el vuelo comercial regular más corto del mundo, entre dos islas escocesas?", real: 90, displayUnit: "s",
+      fact: "El vuelo entre Westray y Papa Westray, en las islas Orcadas escocesas, dura de media apenas <b>90 segundos</b>." },
+    { id: "boxinground", cat: "culture", question: "¿Cuánto dura un asalto de boxeo profesional?", real: 180, displayUnit: "min",
+      fact: "Un asalto (round) de boxeo profesional dura exactamente <b>3 minutos</b>, con 1 minuto de descanso entre ellos." },
+    { id: "chessgameavg", cat: "culture", question: "¿Cuánto puede durar una partida de ajedrez a ritmo clásico de competición?", real: 10800, displayUnit: "h",
+      fact: "Una partida de ajedrez a ritmo clásico, con relojes largos, puede alargarse hasta <b>3 horas</b> o más." },
+    { id: "oscars", cat: "culture", question: "¿Cuánto dura de media la ceremonia de los Premios Óscar?", real: 12600, displayUnit: "h",
+      fact: "La gala de los Premios Óscar dura de media unas <b>3 horas y media</b>." },
+    { id: "superbowlhalftime", cat: "culture", question: "¿Cuánto dura el espectáculo del descanso de la Super Bowl?", real: 780, displayUnit: "min",
+      fact: "El show del descanso de la Super Bowl dura poco más de <b>13 minutos</b>, uno de los escenarios más vistos del mundo." },
+    { id: "vinylside", cat: "culture", question: "¿Cuánto dura de media una cara de un disco de vinilo LP?", real: 1320, displayUnit: "min",
+      fact: "Una cara de un LP de 33 revoluciones dura de media unos <b>22 minutos</b> de música." },
+    { id: "cdmax", cat: "culture", question: "¿Cuál es la duración máxima estándar de un CD de audio?", real: 4440, displayUnit: "min",
+      fact: "El estándar del CD de audio permite hasta <b>74 minutos</b> de música, definido en parte para que cupiera la Novena Sinfonía de Beethoven." },
+    { id: "igstory", cat: "culture", question: "¿Cuánto dura cada fragmento de una historia (Story) en redes sociales?", real: 15, displayUnit: "s",
+      fact: "Cada fragmento individual de una Historia en Instagram dura <b>15 segundos</b> antes de pasar al siguiente." },
+    { id: "bookread", cat: "culture", question: "¿Cuánto se tarda de media en leer una novela de unas 300 páginas?", real: 23400, displayUnit: "h",
+      fact: "Un lector medio tarda alrededor de <b>6 horas y media</b> en leer una novela de 300 páginas." },
+    { id: "elizabethreign", cat: "culture", question: "¿Cuánto duró el reinado de la reina Isabel II del Reino Unido?", real: 2209032000, displayUnit: "year",
+      fact: "Isabel II reinó durante <b>70 años</b> (1952-2022), el reinado más largo de la historia británica." },
+    { id: "titanicsink", cat: "culture", question: "¿Cuánto tardó el Titanic en hundirse tras chocar con el iceberg?", real: 9612, displayUnit: "h",
+      fact: "Tras el impacto, el Titanic tardó unas <b>2 horas y 40 minutos</b> en hundirse por completo." },
+    { id: "moonsurfacetime", cat: "culture", question: "¿Cuánto tiempo pasaron Armstrong y Aldrin en la superficie lunar durante el Apolo 11?", real: 77400, displayUnit: "h",
+      fact: "La tripulación del Apolo 11 permaneció en la superficie lunar unas <b>21 horas y media</b> en total." },
+    { id: "everestsummit", cat: "culture", question: "¿Cuánto dura de media el tramo final de ascenso al Everest, del último campo a la cima?", real: 39600, displayUnit: "h",
+      fact: "El empujón final desde el último campamento hasta la cima del Everest suele durar unas <b>11 horas</b>." },
+    { id: "rubikswr", cat: "culture", question: "¿Cuál es el récord mundial de resolución de un cubo de Rubik?", real: 3.13, displayUnit: "s",
+      fact: "El récord mundial oficial de resolución de un cubo de Rubik 3x3 baja de los <b>3,5 segundos</b>." },
+    { id: "concertavg", cat: "culture", question: "¿Cuánto dura de media un concierto de música pop o rock?", real: 7200, displayUnit: "h",
+      fact: "Un concierto de pop o rock dura de media alrededor de <b>2 horas</b>, incluyendo bises." },
+    { id: "marioanyspeedrun", cat: "culture", question: "¿Cuál es el récord mundial de speedrun 'any%' de Super Mario Bros.?", real: 270, displayUnit: "min",
+      fact: "El récord mundial de speedrun 'any%' de Super Mario Bros. original baja de los <b>5 minutos</b>." },
+    { id: "zanzibarwar", cat: "history", question: "¿Cuánto duró la guerra anglo-zanzibarí, la más corta de la historia?", real: 2280, displayUnit: "min",
+      fact: "La guerra anglo-zanzibarí de 1896 es la más corta documentada de la historia: duró apenas <b>38 minutos</b>." },
+    { id: "hundredyearswar", cat: "history", question: "¿Cuánto duró la Guerra de los Cien Años entre Francia e Inglaterra?", real: 3660681600, displayUnit: "year",
+      fact: "Pese a su nombre, la Guerra de los Cien Años duró en realidad <b>116 años</b> (1337-1453), con largas treguas incluidas." },
+    { id: "ww2", cat: "history", question: "¿Cuánto duró la Segunda Guerra Mundial?", real: 189345600, displayUnit: "year",
+      fact: "La Segunda Guerra Mundial se prolongó durante casi <b>6 años</b>, de 1939 a 1945." },
+    { id: "ww1", cat: "history", question: "¿Cuánto duró la Primera Guerra Mundial?", real: 126230400, displayUnit: "year",
+      fact: "La Primera Guerra Mundial duró algo más de <b>4 años</b>, de 1914 a 1918." },
+    { id: "coldwar", cat: "history", question: "¿Cuánto duró la Guerra Fría, entre el fin de la Segunda Guerra Mundial y la caída de la URSS?", real: 1420092000, displayUnit: "year",
+      fact: "La Guerra Fría se extendió durante unos <b>45 años</b>, de mediados de los 40 a 1991." },
+    { id: "westernromanempire", cat: "history", question: "¿Cuánto duró el Imperio Romano de Occidente tras la caída de la República?", real: 15778800000, displayUnit: "year",
+      fact: "El Imperio Romano de Occidente se mantuvo durante unos <b>500 años</b>, hasta su caída en el 476 d.C." },
+    { id: "blackdeath", cat: "history", question: "¿Cuánto tardó la peste negra en extenderse por toda Europa en el siglo XIV?", real: 220903200, displayUnit: "year",
+      fact: "La peste negra se propagó por toda Europa en apenas <b>7 años</b>, entre 1347 y 1353." },
+    { id: "apolloprogram", cat: "history", question: "¿Cuánto duró el Programa Apolo de la NASA, de principio a fin?", real: 347133600, displayUnit: "year",
+      fact: "El Programa Apolo, desde su anuncio hasta la última misión tripulada, duró unos <b>11 años</b>." },
+    { id: "frenchrevolution", cat: "history", question: "¿Cuánto duró la Revolución Francesa, en su periodo clásico?", real: 315576000, displayUnit: "year",
+      fact: "El periodo clásico de la Revolución Francesa se extiende unos <b>10 años</b>, de 1789 a 1799." },
+    { id: "louisxiv", cat: "history", question: "¿Cuánto duró el reinado de Luis XIV de Francia, el 'Rey Sol'?", real: 2272147200, displayUnit: "year",
+      fact: "Luis XIV reinó durante <b>72 años</b> (1643-1715): el reinado verificado más largo de la historia de Europa." },
+    { id: "greatfirelondon", cat: "history", question: "¿Cuánto duró el Gran Incendio de Londres de 1666?", real: 345600, displayUnit: "day",
+      fact: "El Gran Incendio de Londres de 1666 ardió durante unos <b>4 días</b> antes de ser controlado." },
+    { id: "siegeleningrad", cat: "history", question: "¿Cuánto duró el asedio de Leningrado durante la Segunda Guerra Mundial?", real: 75738240, displayUnit: "year",
+      fact: "El asedio nazi de Leningrado se prolongó durante <b>872 días</b>, casi 2 años y medio: uno de los cercos más largos y mortíferos de la historia." },
+    { id: "cubanmissile", cat: "history", question: "¿Cuánto duró la Crisis de los Misiles de Cuba?", real: 1123200, displayUnit: "day",
+      fact: "La Crisis de los Misiles de Cuba, uno de los momentos más tensos de la Guerra Fría, se resolvió en apenas <b>13 días</b>." },
+    { id: "spacerace", cat: "history", question: "¿Cuánto duró la 'carrera espacial' entre Estados Unidos y la URSS?", real: 378691200, displayUnit: "year",
+      fact: "La carrera espacial, del Sputnik al Apolo 11, se libró en poco más de <b>12 años</b>." },
+    { id: "gizapyramid", cat: "history", question: "¿Cuánto se estima que tardó en construirse la Gran Pirámide de Guiza?", real: 631152000, displayUnit: "year",
+      fact: "Se estima que la Gran Pirámide de Guiza tardó unos <b>20 años</b> en construirse." },
+    { id: "colosseum", cat: "history", question: "¿Cuánto tardó en construirse el Coliseo de Roma?", real: 315576000, displayUnit: "year",
+      fact: "La construcción del Coliseo de Roma llevó alrededor de <b>10 años</b>, entre el 70 y el 80 d.C." },
+    { id: "titanicvoyage", cat: "history", question: "¿Cuánto tiempo navegó el Titanic antes de hundirse en su único viaje?", real: 345600, displayUnit: "day",
+      fact: "El Titanic solo navegó <b>4 días</b> desde que zarpó de Southampton hasta que chocó con el iceberg." },
+    { id: "louisxix", cat: "history", question: "¿Cuánto duró el reinado de Luis XIX de Francia, uno de los más cortos de la historia?", real: 1200, displayUnit: "min",
+      fact: "Luis XIX de Francia fue rey durante apenas <b>20 minutos</b> en 1830, antes de abdicar en favor de su sobrino." },
+    { id: "wrightbrothers", cat: "history", question: "¿Cuánto duró el primer vuelo controlado con motor de la historia, el de los hermanos Wright?", real: 12, displayUnit: "s",
+      fact: "El primer vuelo controlado y sostenido con motor de la historia, en 1903, duró solo <b>12 segundos</b>." },
+    { id: "thirtyyearswar", cat: "history", question: "¿Cuánto duró la Guerra de los Treinta Años en Europa?", real: 946728000, displayUnit: "year",
+      fact: "La Guerra de los Treinta Años, uno de los conflictos más devastadores de la historia europea, duró exactamente <b>30 años</b> (1618-1648)." },
+    { id: "sixdaywar", cat: "history", question: "¿Cuánto duró la Guerra de los Seis Días entre Israel y varios países árabes?", real: 518400, displayUnit: "day",
+      fact: "La Guerra de los Seis Días de 1967 terminó, como indica su nombre, en apenas <b>6 días</b>." },
+    { id: "hundreddays", cat: "history", question: "¿Cuánto duraron los 'Cien Días' del regreso de Napoleón al poder?", real: 9590400, displayUnit: "day",
+      fact: "El regreso de Napoleón al poder tras escapar de la isla de Elba, conocido como los 'Cien Días', duró en realidad <b>111 días</b>." },
+    { id: "concordeservice", cat: "history", question: "¿Cuánto estuvo en servicio comercial el avión supersónico Concorde?", real: 852055200, displayUnit: "year",
+      fact: "El Concorde estuvo volando comercialmente durante <b>27 años</b>, de 1976 a 2003." },
+    { id: "prohibitionus", cat: "history", question: "¿Cuánto duró la Ley Seca (Prohibición) en Estados Unidos?", real: 435494880, displayUnit: "year",
+      fact: "La Prohibición del alcohol en Estados Unidos duró casi <b>14 años</b>, de 1920 a 1933." },
+    { id: "berlinwall", cat: "history", question: "¿Cuánto tiempo estuvo en pie el Muro de Berlín?", real: 883612800, displayUnit: "year",
+      fact: "El Muro de Berlín dividió la ciudad durante <b>28 años</b>, de 1961 a 1989." },
+    { id: "mooreslaw", cat: "tech", question: "Según la Ley de Moore, ¿cada cuánto se duplica aproximadamente el número de transistores en un chip?", real: 63115200, displayUnit: "year",
+      fact: "La observación de Gordon Moore de 1965 predecía que el número de transistores por chip se duplicaría cada <b>2 años</b> aproximadamente." },
+    { id: "iphonecycle", cat: "tech", question: "¿Cada cuánto lanza Apple históricamente un nuevo modelo principal de iPhone?", real: 31557600, displayUnit: "year",
+      fact: "Desde 2007, Apple ha mantenido un ritmo de lanzamiento de un nuevo iPhone principal cada <b>año</b>." },
+    { id: "cdburn1x", cat: "tech", question: "¿Cuánto se tardaba en grabar un CD entero a velocidad 1x, en los primeros grabadores?", real: 4440, displayUnit: "min",
+      fact: "Grabar un CD completo a la velocidad original (1x) tardaba hasta <b>74 minutos</b>, la duración máxima del propio disco." },
+    { id: "googlesearch", cat: "tech", question: "¿Cuánto tarda de media Google en devolver los resultados de una búsqueda?", real: 0.5, displayUnit: "ms",
+      fact: "Una búsqueda típica en Google devuelve resultados en alrededor de <b>medio segundo</b>." },
+    { id: "incandescentlife", cat: "tech", question: "¿Cuántas horas dura de media una bombilla incandescente tradicional?", real: 3600000, displayUnit: "day",
+      fact: "Una bombilla incandescente tradicional dura de media unas 1.000 horas encendida: unos <b>42 días</b> de uso continuo." },
+    { id: "ledlife", cat: "tech", question: "¿Cuántas horas puede durar de media una bombilla LED moderna?", real: 90061643.835616, displayUnit: "year",
+      fact: "Una bombilla LED moderna puede durar unas 25.000 horas: casi <b>3 años</b> si estuviera encendida sin parar." },
+    { id: "bitcoinblock", cat: "tech", question: "¿Cada cuánto se mina de media un nuevo bloque en la red de Bitcoin?", real: 600, displayUnit: "min",
+      fact: "La red de Bitcoin está diseñada para minar un nuevo bloque cada <b>10 minutos</b> de media." },
+    { id: "phonecharge", cat: "tech", question: "¿Cuánto tarda de media un smartphone moderno en cargarse del 0 al 100%?", real: 5400, displayUnit: "h",
+      fact: "Un smartphone moderno con carga rápida tarda de media en torno a <b>1 hora y media</b> en cargarse por completo." },
+    { id: "firstyoutube", cat: "tech", question: "¿Cuánto dura el primer vídeo subido a YouTube, 'Me at the zoo'?", real: 19, displayUnit: "s",
+      fact: "El primer vídeo subido a YouTube en 2005, 'Me at the zoo', dura solo <b>19 segundos</b>." },
+    { id: "modemhandshake", cat: "tech", question: "¿Cuánto duraba el característico sonido de conexión de un módem de 56k?", real: 12, displayUnit: "s",
+      fact: "El pitido y ruido de la conexión de un módem dial-up de 56k duraba unos <b>12 segundos</b>." },
+    { id: "3dprintsmall", cat: "tech", question: "¿Cuánto puede tardar una impresora 3D casera en imprimir un objeto pequeño, como una figura de unos centímetros?", real: 9000, displayUnit: "h",
+      fact: "Imprimir en 3D un objeto pequeño con una impresora doméstica suele tardar unas <b>2 horas y media</b>." },
+    { id: "teslasupercharge", cat: "tech", question: "¿Cuánto tarda un coche eléctrico en recuperar buena parte de su autonomía en un cargador rápido?", real: 1200, displayUnit: "min",
+      fact: "En un cargador rápido, un coche eléctrico puede recuperar gran parte de su batería en unos <b>20 minutos</b>." },
+    { id: "geoorbit", cat: "tech", question: "¿Cuánto tarda un satélite geoestacionario en dar una vuelta a la Tierra?", real: 86400, displayUnit: "h",
+      fact: "Un satélite geoestacionario orbita cada <b>24 horas</b> exactas, igual que gira la Tierra, por eso parece fijo en el cielo." },
+    { id: "gpsorbit", cat: "tech", question: "¿Cuánto tarda un satélite GPS en dar una vuelta orbital a la Tierra?", real: 43200, displayUnit: "h",
+      fact: "Los satélites GPS orbitan la Tierra dos veces al día: una vuelta completa cada <b>12 horas</b>." },
+    { id: "cassetteside", cat: "tech", question: "¿Cuánto dura de media una cara de una cinta de casete estándar?", real: 2700, displayUnit: "min",
+      fact: "Una cara de una cinta de casete de 90 minutos dura, como su propio nombre indica, unos <b>45 minutos</b>." },
+    { id: "vhstape", cat: "tech", question: "¿Cuánto puede grabar una cinta VHS estándar en modo de calidad normal (SP)?", real: 7200, displayUnit: "h",
+      fact: "Una cinta VHS estándar T-120 graba hasta <b>2 horas</b> en modo de máxima calidad (SP)." },
+    { id: "pythonrelease", cat: "tech", question: "¿Cada cuánto suele publicar el proyecto Python una nueva versión mayor?", real: 31557600, displayUnit: "year",
+      fact: "Desde hace varios años, Python publica una nueva versión mayor (3.x) cada <b>año</b> aproximadamente." },
+    { id: "earthrotation", cat: "nature", question: "¿Cuánto dura realmente una vuelta completa de la Tierra sobre su eje (día sideral)?", real: 86148, displayUnit: "h",
+      fact: "El día sideral, la vuelta real de la Tierra sobre su eje respecto a las estrellas, dura <b>23 horas y 56 minutos</b>: algo menos que el día solar de 24 horas." },
+    { id: "tidecycle", cat: "nature", question: "¿Cada cuánto se repite el ciclo de marea alta a marea alta en la mayoría de costas?", real: 44712, displayUnit: "h",
+      fact: "En la mayoría de costas del mundo, las mareas siguen un ciclo semidiurno: marea alta cada <b>12 horas y 25 minutos</b>." },
+    { id: "vesuvius", cat: "nature", question: "¿Cuánto duró la erupción del Vesubio que sepultó Pompeya en el año 79?", real: 172800, displayUnit: "day",
+      fact: "La erupción del Vesubio que sepultó Pompeya en el año 79 d.C. se prolongó durante <b>2 días</b>." },
+    { id: "hurricanelife", cat: "nature", question: "¿Cuánto dura de media un huracán del Atlántico, desde que se forma hasta que se disipa?", real: 777600, displayUnit: "day",
+      fact: "Un huracán atlántico típico dura de media unos <b>9 días</b> desde su formación hasta su disipación." },
+    { id: "earthquakeshake", cat: "nature", question: "¿Cuánto suele durar el temblor de un terremoto importante?", real: 45, displayUnit: "s",
+      fact: "El movimiento sísmico perceptible de un terremoto grande suele durar entre 20 y 60 segundos: unos <b>45 segundos</b> de media." },
+    { id: "lightningflash", cat: "nature", question: "¿Cuánto dura un relámpago visible en el cielo?", real: 0.2, displayUnit: "ms",
+      fact: "Un relámpago, aunque parece instantáneo, dura en realidad unos <b>200 milisegundos</b> por los múltiples descargas que lo componen." },
+    { id: "stalactitecm", cat: "nature", question: "¿Cuánto puede tardar una estalactita en crecer 1 centímetro?", real: 3155760000, displayUnit: "year",
+      fact: "Las estalactitas crecen muy despacio: pueden tardar más de <b>100 años</b> en crecer un solo centímetro." },
+    { id: "diamondformation", cat: "nature", question: "¿Cuánto tardan en formarse los diamantes en el manto terrestre?", real: 31557600000000000, displayUnit: "year",
+      fact: "La mayoría de los diamantes tardaron alrededor de <b>1.000 millones de años</b> en formarse en el manto terrestre." },
+    { id: "grandcanyon", cat: "nature", question: "¿Cuánto tardó el río Colorado en excavar el Gran Cañón?", real: 189345600000000, displayUnit: "year",
+      fact: "Se estima que el río Colorado tardó unos <b>6 millones de años</b> en excavar el Gran Cañón." },
+    { id: "greatbarrierreef", cat: "nature", question: "¿Cuánto se estima que ha tardado en formarse la estructura actual de la Gran Barrera de Coral?", real: 631152000000, displayUnit: "year",
+      fact: "La estructura actual de la Gran Barrera de Coral se ha ido formando durante unos <b>20.000 años</b>." },
+    { id: "lasticeage", cat: "nature", question: "¿Cuánto duró el último periodo glacial?", real: 3155760000000, displayUnit: "year",
+      fact: "El último gran periodo glacial duró aproximadamente <b>100.000 años</b>, terminando hace unos 11.700 años." },
+    { id: "dinosaurera", cat: "nature", question: "¿Durante cuánto tiempo existieron los dinosaurios no aviares en la Tierra?", real: 5207004000000000, displayUnit: "year",
+      fact: "Los dinosaurios no aviares dominaron la Tierra durante unos <b>165 millones de años</b>, hasta su extinción hace 66 millones de años." },
+    { id: "redwoodlife", cat: "nature", question: "¿Cuánto puede vivir una secuoya gigante?", real: 94672800000, displayUnit: "year",
+      fact: "Las secuoyas gigantes se encuentran entre los seres vivos más longevos: algunas superan los <b>3.000 años</b>." },
+    { id: "bristleconepine", cat: "nature", question: "¿Cuántos años tiene el pino longevo (bristlecone) más antiguo conocido?", real: 153054360000, displayUnit: "year",
+      fact: "El pino longevo más viejo documentado tiene casi <b>4.850 años</b>: es más antiguo que las pirámides de Egipto." },
+    { id: "bamboogrowth", cat: "nature", question: "¿Cuánto puede tardar el bambú de crecimiento más rápido en crecer 1 metro?", real: 86400, displayUnit: "h",
+      fact: "Algunas especies de bambú pueden crecer casi 1 metro en un solo día: en torno a <b>24 horas</b> para ese metro." },
+    { id: "dateseed", cat: "nature", question: "¿Cuántos años tenía la semilla de dátil viable más antigua jamás germinada?", real: 63115200000, displayUnit: "year",
+      fact: "En 2005 se germinó una semilla de dátil de unos <b>2.000 años</b> de antigüedad, hallada en la fortaleza de Masada." },
+    { id: "tsunamipacific", cat: "nature", question: "¿Cuánto puede tardar un tsunami en cruzar todo el océano Pacífico?", real: 75600, displayUnit: "h",
+      fact: "Un tsunami originado en un extremo del océano Pacífico puede tardar unas <b>21 horas</b> en cruzarlo por completo." },
+    { id: "caveformation", cat: "nature", question: "¿Cuánto puede tardar en formarse un gran sistema de cuevas de caliza?", real: 6311520000000, displayUnit: "year",
+      fact: "Un gran sistema de cuevas kársticas puede tardar del orden de <b>200.000 años</b> en formarse por disolución de la roca." },
+    { id: "monsoonseason", cat: "nature", question: "¿Cuánto dura la temporada de monzón en el sur de Asia?", real: 10368000, displayUnit: "day",
+      fact: "La temporada de monzón en el sur de Asia dura típicamente unos <b>4 meses</b>, de junio a septiembre." },
+    { id: "magneticreversal", cat: "nature", question: "¿Cada cuánto se invierte de media el campo magnético terrestre, a lo largo de la historia geológica?", real: 9467280000000, displayUnit: "year",
+      fact: "El campo magnético de la Tierra se ha invertido de media cada <b>300.000 años</b> aproximadamente, aunque de forma muy irregular." },
+    { id: "olympic100m", cat: "sports", question: "¿Cuál es el récord mundial masculino de los 100 metros lisos?", real: 9.58, displayUnit: "s",
+      fact: "El récord mundial de los 100 metros lisos, de Usain Bolt (2009), es de <b>9,58 segundos</b>." },
+    { id: "marathonwr", cat: "sports", question: "¿Cuál es el récord mundial masculino de maratón?", real: 7236, displayUnit: "h",
+      fact: "El récord mundial masculino de maratón baja de las <b>2 horas y 1 minuto</b>." },
+    { id: "wimbledonlongest", cat: "sports", question: "¿Cuánto duró el partido de tenis más largo de la historia, en Wimbledon 2010?", real: 39888, displayUnit: "h",
+      fact: "El partido entre John Isner y Nicolas Mahut en Wimbledon 2010 duró <b>11 horas y 5 minutos</b>, repartido en tres días." },
+    { id: "tourdefrance", cat: "sports", question: "¿Cuánto dura el Tour de Francia, de principio a fin?", real: 1987200, displayUnit: "day",
+      fact: "El Tour de Francia se disputa a lo largo de unas <b>23 jornadas</b>, incluyendo días de descanso." },
+    { id: "nflgametime", cat: "sports", question: "¿Cuánto dura el tiempo de juego oficial de un partido de la NFL?", real: 3600, displayUnit: "min",
+      fact: "Un partido de fútbol americano de la NFL tiene un tiempo de juego oficial en el reloj de <b>60 minutos</b>, repartidos en 4 cuartos." },
+    { id: "nbagametime", cat: "sports", question: "¿Cuántos minutos de juego tiene oficialmente un partido de la NBA?", real: 2880, displayUnit: "min",
+      fact: "Un partido de la NBA tiene <b>48 minutos</b> de juego oficial, repartidos en 4 cuartos de 12 minutos." },
+    { id: "mlbgameavg", cat: "sports", question: "¿Cuánto dura de media un partido de béisbol de las Grandes Ligas (MLB)?", real: 10800, displayUnit: "h",
+      fact: "Un partido de béisbol de la MLB dura de media alrededor de <b>3 horas</b>." },
+    { id: "tennissetavg", cat: "sports", question: "¿Cuánto dura de media un set de tenis?", real: 2400, displayUnit: "min",
+      fact: "Un set de tenis dura de media entre 30 y 45 minutos: unos <b>40 minutos</b>." },
+    { id: "rugbymatch", cat: "sports", question: "¿Cuánto dura el tiempo de juego de un partido de rugby union?", real: 4800, displayUnit: "min",
+      fact: "Un partido de rugby union tiene <b>80 minutos</b> de tiempo de juego, en dos partes de 40." },
+    { id: "ironmanpro", cat: "sports", question: "¿Cuánto tarda un triatleta profesional de élite en completar un Ironman?", real: 28800, displayUnit: "h",
+      fact: "Los mejores triatletas profesionales completan un Ironman (3,8 km nadando, 180 km en bici y maratón) en poco más de <b>8 horas</b>." },
+    { id: "tdfstage", cat: "sports", question: "¿Cuánto dura de media una etapa del Tour de Francia?", real: 16200, displayUnit: "h",
+      fact: "Una etapa del Tour de Francia dura de media unas <b>4 horas y media</b> de carrera." },
+    { id: "boxing12rounds", cat: "sports", question: "¿Cuánto dura en total un combate de boxeo profesional a 12 asaltos, sin contar descansos?", real: 2160, displayUnit: "min",
+      fact: "Un combate de boxeo a 12 asaltos de 3 minutos suma <b>36 minutos</b> de tiempo de combate puro, sin contar los descansos." },
+    { id: "crickettest", cat: "sports", question: "¿Cuánto puede llegar a durar un partido de críquet de test?", real: 432000, displayUnit: "day",
+      fact: "Un partido de críquet en su modalidad 'test', la más larga, puede extenderse hasta <b>5 días</b>." },
+    { id: "golfround", cat: "sports", question: "¿Cuánto se tarda de media en completar una ronda de golf de 18 hoyos?", real: 16200, displayUnit: "h",
+      fact: "Una ronda de golf de 18 hoyos amateur suele tardar en torno a <b>4 horas y media</b>." },
+    { id: "swim100free", cat: "sports", question: "¿Cuál es el récord mundial masculino de 100 metros libres en natación?", real: 46.86, displayUnit: "s",
+      fact: "El récord mundial masculino de 100 metros estilo libre es de <b>46,86 segundos</b>." },
+    { id: "sprint200mwr", cat: "sports", question: "¿Cuál es el récord mundial masculino de los 200 metros lisos?", real: 19.19, displayUnit: "s",
+      fact: "El récord mundial de los 200 metros lisos, también de Usain Bolt (2009), es de <b>19,19 segundos</b>." },
+    { id: "openwater10k", cat: "sports", question: "¿Cuánto tarda de media un nadador de élite en completar 10 km en aguas abiertas?", real: 6300, displayUnit: "h",
+      fact: "Los mejores nadadores de aguas abiertas completan los 10 km en algo menos de <b>1 hora y 45 minutos</b>." },
+    { id: "ufcround", cat: "sports", question: "¿Cuánto dura un asalto en una pelea de UFC/MMA?", real: 300, displayUnit: "min",
+      fact: "Cada asalto de una pelea profesional de UFC dura <b>5 minutos</b>." },
+    { id: "kentuckyderby", cat: "sports", question: "¿Cuánto dura la carrera del Derby de Kentucky, 'los dos minutos más emocionantes del deporte'?", real: 120, displayUnit: "min",
+      fact: "El Derby de Kentucky es apodado 'los dos minutos más emocionantes del deporte': la carrera en sí dura apenas <b>2 minutos</b>." },
+    { id: "olympicsopening", cat: "sports", question: "¿Cuánto dura de media la ceremonia de apertura de unos Juegos Olímpicos?", real: 14400, displayUnit: "h",
+      fact: "Una ceremonia de apertura olímpica moderna dura de media alrededor de <b>4 horas</b>." },
+    { id: "worldcupmatch", cat: "sports", question: "¿Cuánto dura el tiempo reglamentario de un partido del Mundial de fútbol, sin prórroga?", real: 5400, displayUnit: "min",
+      fact: "Un partido de fútbol del Mundial dura <b>90 minutos</b> reglamentarios, repartidos en dos partes de 45." },
+    { id: "nbashotclock", cat: "sports", question: "¿Cuánto dura el reloj de posesión (shot clock) en la NBA?", real: 24, displayUnit: "s",
+      fact: "En la NBA, un equipo dispone de <b>24 segundos</b> de posesión para intentar un lanzamiento a canasta." },
+    { id: "uciHourRecord", cat: "sports", question: "¿Durante cuánto tiempo pedalea un ciclista al intentar el Récord de la Hora?", real: 3600, displayUnit: "h",
+      fact: "El Récord de la Hora consiste en recorrer la mayor distancia posible en bicicleta durante exactamente <b>1 hora</b>." },
+    { id: "chessblitz", cat: "sports", question: "¿Cuánto tiempo total tiene cada jugador en una partida de ajedrez blitz estándar?", real: 300, displayUnit: "min",
+      fact: "En el ajedrez blitz estándar, cada jugador dispone de <b>5 minutos</b> en su reloj para toda la partida." },
+    { id: "decathlon", cat: "sports", question: "¿Cuánto dura una competición completa de decatlón olímpico?", real: 172800, displayUnit: "day",
+      fact: "El decatlón olímpico, con sus diez pruebas, se disputa a lo largo de <b>2 días</b> consecutivos." },
+    { id: "nflplayclock", cat: "sports", question: "¿Cuánto tiempo tiene un equipo de la NFL entre jugada y jugada (play clock)?", real: 40, displayUnit: "s",
+      fact: "Entre el final de una jugada y el inicio de la siguiente, un equipo de la NFL dispone de <b>40 segundos</b> de reloj de jugada." },
+    { id: "weightliftingsnatch", cat: "sports", question: "¿Cuánto dura el propio levantamiento en un intento de arrancada de halterofilia olímpica?", real: 1.5, displayUnit: "s",
+      fact: "El levantamiento en sí de una arrancada olímpica de halterofilia dura apenas <b>1 o 2 segundos</b> desde el suelo hasta los brazos extendidos." },
+    { id: "nerveregrow", cat: "body", question: "¿Cuánto tarda un nervio periférico dañado en regenerarse 1 centímetro?", real: 864000, displayUnit: "day",
+      fact: "Un nervio periférico se regenera a un ritmo de aproximadamente 1 mm al día: un centímetro tarda unos <b>10 días</b>." },
+    { id: "ribheal", cat: "body", question: "¿Cuánto tarda en soldar una costilla fracturada?", real: 3628800, displayUnit: "day",
+      fact: "Una costilla fracturada tarda de media <b>6 semanas</b> (42 días) en soldar, similar a otras fracturas simples." },
+    { id: "concussion", cat: "body", question: "¿Cuánto tardan en resolverse los síntomas de una conmoción cerebral leve?", real: 1209600, displayUnit: "day",
+      fact: "Los síntomas de una conmoción leve suelen resolverse en un plazo de <b>2 semanas</b> en la mayoría de los casos." },
+    { id: "fluduration", cat: "body", question: "¿Cuánto dura de media un episodio de gripe común?", real: 518400, displayUnit: "day",
+      fact: "Un episodio de gripe estacional suele durar entre 5 y 7 días: unos <b>6 días</b> de media." },
+    { id: "stitchesdissolve", cat: "body", question: "¿Cuánto tardan en disolverse unos puntos de sutura reabsorbibles?", real: 1209600, displayUnit: "day",
+      fact: "Los puntos de sutura reabsorbibles suelen disolverse en el cuerpo en torno a <b>2 semanas</b>." },
+    { id: "bruiseheal", cat: "body", question: "¿Cuánto tarda en desaparecer un cardenal (moratón) típico?", real: 1036800, displayUnit: "day",
+      fact: "Un cardenal típico cambia de color y desaparece por completo en torno a <b>12 días</b>." },
+    { id: "feverduration", cat: "body", question: "¿Cuánto dura de media una fiebre por una infección vírica común?", real: 259200, displayUnit: "day",
+      fact: "Una fiebre asociada a una infección vírica leve suele remitir en torno a <b>3 días</b>." },
+    { id: "musclerepair", cat: "body", question: "¿Cuánto dura el proceso activo de reparación muscular tras un entrenamiento intenso?", real: 129600, displayUnit: "h",
+      fact: "La síntesis de proteína muscular para reparar el tejido tras un entrenamiento intenso se mantiene elevada durante <b>36 horas</b> aproximadamente." },
+    { id: "caffeinehalflife", cat: "body", question: "¿Cuál es la vida media de la cafeína en el cuerpo humano, el tiempo en que se elimina la mitad?", real: 18000, displayUnit: "h",
+      fact: "La cafeína tiene una vida media de unas <b>5 horas</b>: ese es el tiempo que tarda el cuerpo en eliminar la mitad de la dosis." },
+    { id: "tanfade", cat: "body", question: "¿Cuánto tarda en desaparecer un bronceado si dejas de tomar el sol?", real: 2592000, displayUnit: "day",
+      fact: "Sin más exposición al sol, un bronceado suele desvanecerse por completo en torno a <b>30 días</b>, al renovarse la piel." },
+    { id: "blisterheal", cat: "body", question: "¿Cuánto tarda en curarse una ampolla típica en el pie?", real: 604800, displayUnit: "day",
+      fact: "Una ampolla no infectada suele curarse por sí sola en aproximadamente <b>1 semana</b>." },
+    { id: "mosquitobite", cat: "body", question: "¿Cuánto dura la hinchazón y el picor de una picadura de mosquito?", real: 345600, displayUnit: "day",
+      fact: "La reacción a una picadura de mosquito, con su hinchazón y picor, suele remitir en unos <b>4 días</b>." },
+    { id: "jetlag", cat: "body", question: "¿Cuánto tarda de media el cuerpo en adaptarse tras cruzar 6 husos horarios (jet lag)?", real: 518400, displayUnit: "day",
+      fact: "Como norma general, el cuerpo tarda un día en adaptarse por cada huso horario cruzado: unos <b>6 días</b> tras un vuelo de 6 husos." },
+    { id: "nosebleed", cat: "body", question: "¿Cuánto dura de media una hemorragia nasal (epistaxis) típica sin complicaciones?", real: 600, displayUnit: "min",
+      fact: "Una hemorragia nasal simple, con la presión adecuada, suele detenerse en unos <b>10 minutos</b>." },
+    { id: "scabheal", cat: "body", question: "¿Cuánto tarda en caerse una costra tras una herida superficial?", real: 864000, displayUnit: "day",
+      fact: "Una costra protectora sobre una herida superficial suele caerse por sí sola en torno a <b>10 días</b>." },
+    { id: "platypusincub", cat: "animals", question: "¿Cuánto tardan en incubar los huevos de un ornitorrinco?", real: 864000, displayUnit: "day",
+      fact: "El ornitorrinco, uno de los pocos mamíferos que pone huevos, los incuba durante unos <b>10 días</b>." },
+    { id: "kangaroogest", cat: "animals", question: "¿Cuánto dura la gestación de un canguro, sorprendentemente corta?", real: 2851200, displayUnit: "day",
+      fact: "Pese a su tamaño, la gestación de un canguro dura solo unos <b>33 días</b>: la cría nace diminuta y termina de desarrollarse en la bolsa." },
+    { id: "sharktooth", cat: "animals", question: "¿Cuánto dura de media un solo diente de tiburón antes de ser reemplazado?", real: 864000, displayUnit: "day",
+      fact: "Los tiburones renuevan sus dientes constantemente: cada uno dura de media en torno a <b>10 días</b> antes de caer y ser sustituido." },
+    { id: "seahorsegest", cat: "animals", question: "¿Cuánto dura la gestación de un caballito de mar, que lleva a cabo el macho?", real: 2073600, displayUnit: "day",
+      fact: "En los caballitos de mar es el macho quien gesta a las crías en su bolsa incubadora, durante unos <b>24 días</b>." },
+    { id: "pandagest", cat: "animals", question: "¿Cuánto dura de media la gestación de un panda gigante?", real: 11664000, displayUnit: "day",
+      fact: "La gestación del panda gigante es muy variable, pero dura de media unos <b>135 días</b>, incluyendo un periodo de implantación retardada." },
+    { id: "rabbitgest", cat: "animals", question: "¿Cuánto dura la gestación de una coneja?", real: 2678400, displayUnit: "day",
+      fact: "La gestación de una coneja dura solo unos <b>31 días</b>, una de las más cortas entre los mamíferos." },
+    { id: "hamstergest", cat: "animals", question: "¿Cuánto dura la gestación de una hámster, de las más cortas entre los mamíferos?", real: 1468800, displayUnit: "day",
+      fact: "Una hámster está preñada solo unos <b>17 días</b>: una de las gestaciones más rápidas de todos los mamíferos." },
+    { id: "flealifecycle", cat: "animals", question: "¿Cuánto puede tardar una pulga en completar su ciclo vital, de huevo a adulta, en condiciones favorables?", real: 1814400, displayUnit: "day",
+      fact: "En condiciones favorables, una pulga puede completar su ciclo de huevo a adulta en unas <b>3 semanas</b>." },
+    { id: "butterflymeta", cat: "animals", question: "¿Cuánto dura la metamorfosis de una oruga de mariposa monarca dentro de la crisálida?", real: 1036800, displayUnit: "day",
+      fact: "Dentro de la crisálida, la metamorfosis de la oruga monarca en mariposa adulta tarda unos <b>12 días</b>." },
+    { id: "silkwormmeta", cat: "animals", question: "¿Cuánto tarda un gusano de seda en convertirse en polilla adulta dentro del capullo?", real: 1382400, displayUnit: "day",
+      fact: "Desde que teje su capullo hasta que emerge como polilla adulta, el gusano de seda tarda unos <b>16 días</b>." },
+    { id: "dragonflynymph", cat: "animals", question: "¿Cuánto puede vivir bajo el agua una ninfa de libélula antes de convertirse en adulta?", real: 63115200, displayUnit: "year",
+      fact: "Según la especie, una ninfa de libélula puede vivir sumergida hasta <b>2 años</b> antes de emerger como libélula adulta voladora." },
+    { id: "liongest", cat: "animals", question: "¿Cuánto dura la gestación de una leona?", real: 9504000, displayUnit: "day",
+      fact: "La gestación de una leona dura de media unos <b>110 días</b>, algo menos de 4 meses." },
+    { id: "giraffegest", cat: "animals", question: "¿Cuánto dura la gestación de una jirafa?", real: 39447000, displayUnit: "year",
+      fact: "La gestación de una jirafa es una de las más largas entre los mamíferos terrestres: unos <b>15 meses</b>." },
+    { id: "rhinogest", cat: "animals", question: "¿Cuánto dura la gestación de un rinoceronte blanco?", real: 41971608, displayUnit: "year",
+      fact: "Un rinoceronte blanco está preñada durante unos <b>16 meses</b>, más de un año entero." },
+    { id: "koalagest", cat: "animals", question: "¿Cuánto dura la gestación de una koala, antes de que la cría se desarrolle en la bolsa?", real: 3024000, displayUnit: "day",
+      fact: "La gestación de una koala dura solo unos <b>35 días</b>: la cría nace muy inmadura y crece meses en la bolsa materna." },
+    { id: "crocincub", cat: "animals", question: "¿Cuánto tardan en incubar los huevos de un cocodrilo?", real: 7344000, displayUnit: "day",
+      fact: "Los huevos de cocodrilo tardan de media unos <b>85 días</b> en incubar, enterrados en un nido de vegetación o arena." },
+    { id: "ostrichincub", cat: "animals", question: "¿Cuánto tardan en incubar los huevos de avestruz, los más grandes de cualquier ave?", real: 3801600, displayUnit: "day",
+      fact: "Los huevos de avestruz tardan unos <b>44 días</b> en incubar, uno de los periodos más largos entre las aves." },
+    { id: "turtleincub", cat: "animals", question: "¿Cuánto tardan en incubar los huevos de tortuga marina bajo la arena?", real: 5184000, displayUnit: "day",
+      fact: "Los huevos de tortuga marina incuban bajo la arena durante unos <b>60 días</b> antes de que las crías salgan hacia el mar." },
+    { id: "groundhoghibernate", cat: "animals", question: "¿Cuánto puede durar la hibernación de una marmota?", real: 12960000, displayUnit: "day",
+      fact: "Una marmota puede hibernar hasta <b>150 días</b> (5 meses), reduciendo drásticamente su ritmo cardíaco y temperatura corporal." },
+    { id: "saturnday", cat: "space", question: "¿Cuánto dura un día en Saturno?", real: 37980, displayUnit: "h",
+      fact: "Saturno gira muy rápido para su tamaño: un día allí dura poco más de <b>10 horas y media</b>." },
+    { id: "saturnyear", cat: "space", question: "¿Cuánto dura un año en Saturno?", real: 927793440, displayUnit: "year",
+      fact: "Saturno tarda unos <b>29 años y medio</b> terrestres en completar una vuelta alrededor del Sol." },
+    { id: "uranusday", cat: "space", question: "¿Cuánto dura un día en Urano?", real: 62064, displayUnit: "h",
+      fact: "Urano completa una rotación sobre su eje en unas <b>17 horas y cuarto</b>." },
+    { id: "uranusyear", cat: "space", question: "¿Cuánto dura un año en Urano?", real: 2650838400, displayUnit: "year",
+      fact: "Urano tarda <b>84 años</b> terrestres en dar una vuelta completa al Sol: casi una vida humana entera." },
+    { id: "neptuneday", cat: "space", question: "¿Cuánto dura un día en Neptuno?", real: 57960, displayUnit: "h",
+      fact: "Neptuno gira sobre sí mismo en unas <b>16 horas</b>, un poco más rápido que la Tierra." },
+    { id: "plutoyear", cat: "space", question: "¿Cuánto dura un año en Plutón?", real: 7826284800, displayUnit: "year",
+      fact: "Plutón tarda <b>248 años</b> terrestres en completar una órbita al Sol: desde su descubrimiento en 1930 no ha dado ni una vuelta entera." },
+    { id: "plutoday", cat: "space", question: "¿Cuánto dura un día en Plutón?", real: 552960, displayUnit: "day",
+      fact: "Plutón gira muy despacio: un día allí dura unos <b>6 días y medio</b> terrestres." },
+    { id: "jwsttransit", cat: "space", question: "¿Cuánto tardó el telescopio espacial James Webb en llegar a su posición orbital final?", real: 2592000, displayUnit: "day",
+      fact: "El telescopio James Webb tardó cerca de <b>30 días</b> en llegar a su punto de observación, a 1,5 millones de km de la Tierra." },
+    { id: "curiositytransit", cat: "space", question: "¿Cuánto tardó el rover Curiosity en viajar de la Tierra a Marte?", real: 21859200, displayUnit: "day",
+      fact: "El viaje de crucero del rover Curiosity desde la Tierra hasta Marte duró unos <b>253 días</b>, más de 8 meses." },
+    { id: "moondaylight", cat: "space", question: "¿Cuánto dura el día (con luz solar) en la superficie de la Luna?", real: 1274400, displayUnit: "day",
+      fact: "En la Luna, la parte iluminada del ciclo día-noche dura unos <b>14,75 días</b> terrestres seguidos: la mitad de su largo 'mes' completo." },
+    { id: "phobosorbit", cat: "space", question: "¿Cuánto tarda Fobos, la luna de Marte, en dar una vuelta orbital completa?", real: 27576, displayUnit: "h",
+      fact: "Fobos orbita Marte tan rápido que completa una vuelta en solo <b>7 horas y 40 minutos</b>: más rápido de lo que gira el propio Marte." },
+    { id: "sunplutolight", cat: "space", question: "¿Cuánto tarda la luz del Sol en llegar hasta Plutón?", real: 19800, displayUnit: "h",
+      fact: "A la distancia de Plutón, la luz del Sol tarda unas <b>5 horas y media</b> en llegar, frente a los 8 minutos que tarda hasta la Tierra." },
+    { id: "voyagertojupiter", cat: "space", question: "¿Cuánto tardó la sonda Voyager 1 en llegar a Júpiter tras su lanzamiento?", real: 50492160, displayUnit: "year",
+      fact: "La Voyager 1, lanzada en 1977, tardó cerca de <b>1 año y medio</b> en sobrevolar Júpiter en 1979." },
+    { id: "grammyshow", cat: "culture", question: "¿Cuánto dura de media la ceremonia de los Premios Grammy?", real: 12600, displayUnit: "h",
+      fact: "La gala de los Premios Grammy dura de media unas <b>3 horas y media</b>, similar a los Óscar." },
+    { id: "sitcomep", cat: "culture", question: "¿Cuánto dura de media un episodio de comedia de situación (sitcom), sin los anuncios?", real: 1320, displayUnit: "min",
+      fact: "Un episodio de sitcom de 'media hora' dura en realidad solo unos <b>22 minutos</b> de contenido, sin contar los anuncios." },
+    { id: "dramaep", cat: "culture", question: "¿Cuánto dura de media un episodio de una serie dramática de 'una hora', sin los anuncios?", real: 2520, displayUnit: "min",
+      fact: "Un episodio de serie dramática de 'una hora' dura en realidad unos <b>42 minutos</b> de contenido real." },
+    { id: "broadwayshow", cat: "culture", question: "¿Cuánto dura de media un musical de Broadway, incluyendo el descanso?", real: 9000, displayUnit: "h",
+      fact: "Un musical de Broadway dura de media unas <b>2 horas y media</b>, incluyendo el intermedio." },
+    { id: "tedtalk", cat: "culture", question: "¿Cuál es la duración máxima permitida de una charla TED?", real: 1080, displayUnit: "min",
+      fact: "Las charlas TED tienen un límite estricto de <b>18 minutos</b>, pensado para mantener la atención del público." },
+    { id: "superbowlbroadcast", cat: "culture", question: "¿Cuánto dura la retransmisión televisiva completa de una Super Bowl, con pregame y anuncios?", real: 14400, displayUnit: "h",
+      fact: "Contando previa, partido y anuncios, la retransmisión completa de una Super Bowl ronda las <b>4 horas</b>." },
+    { id: "worldcuptournament", cat: "culture", question: "¿Cuánto dura el torneo completo de la Copa Mundial de fútbol, de principio a fin?", real: 2592000, displayUnit: "day",
+      fact: "El Mundial de fútbol, desde el partido inaugural hasta la final, se disputa a lo largo de aproximadamente <b>1 mes</b>." },
+    { id: "olympicsduration", cat: "culture", question: "¿Cuántos días duran los Juegos Olímpicos de Verano?", real: 1468800, displayUnit: "day",
+      fact: "Los Juegos Olímpicos de Verano se disputan a lo largo de <b>17 días</b>, de la ceremonia de apertura a la de clausura." },
+    { id: "coronationceremony", cat: "culture", question: "¿Cuánto duró la ceremonia de coronación del rey Carlos III en 2023?", real: 7200, displayUnit: "h",
+      fact: "La ceremonia de coronación de Carlos III en la Abadía de Westminster duró en torno a <b>2 horas</b>." },
+    { id: "moonwalkbroadcast", cat: "culture", question: "¿Cuánto duró la retransmisión televisiva en directo del primer paseo lunar del Apolo 11?", real: 9000, displayUnit: "h",
+      fact: "La retransmisión en directo del primer paseo lunar de Armstrong y Aldrin se prolongó unas <b>2 horas y media</b>." },
+    { id: "audiobookavg", cat: "culture", question: "¿Cuánto dura de media un audiolibro de una novela estándar?", real: 36000, displayUnit: "h",
+      fact: "Un audiolibro de una novela de longitud media dura en torno a <b>10 horas</b> de narración." },
+    { id: "podcastavg", cat: "culture", question: "¿Cuánto dura de media un episodio de podcast?", real: 2580, displayUnit: "min",
+      fact: "Un episodio de podcast dura de media unos <b>43 minutos</b>, aunque varía muchísimo según el formato." },
+    { id: "bingeseasontime", cat: "culture", question: "¿Cuánto se tarda de media en ver de un tirón (maratón) una temporada de serie de unos 8-10 episodios?", real: 25200, displayUnit: "h",
+      fact: "Ver de un tirón una temporada típica de 8-10 episodios de unos 45 minutos lleva en torno a <b>7 horas</b>." },
+    { id: "hotdogcontest", cat: "culture", question: "¿Cuánto dura el famoso concurso de comer perritos calientes de Nathan's en Nueva York?", real: 600, displayUnit: "min",
+      fact: "El concurso competitivo de comer perritos calientes de Nathan's, en Coney Island, dura exactamente <b>10 minutos</b>." },
+    { id: "russianrevolution", cat: "history", question: "¿Cuánto duró la fase armada de la Revolución de Octubre de 1917 en Petrogrado?", real: 691200, displayUnit: "day",
+      fact: "La toma insurreccional del poder en Petrogrado en octubre de 1917 se resolvió en apenas <b>8 días</b>." },
+    { id: "constantinoplesiege", cat: "history", question: "¿Cuánto duró el asedio otomano que terminó con la caída de Constantinopla en 1453?", real: 4579200, displayUnit: "day",
+      fact: "El asedio otomano final de Constantinopla, que puso fin al Imperio bizantino, duró <b>53 días</b>." },
+    { id: "normandybattle", cat: "history", question: "¿Cuánto duró la Batalla de Normandía, desde el desembarco hasta la liberación de la región?", real: 7776000, displayUnit: "day",
+      fact: "Desde el Día D hasta la liberación de Normandía, la batalla se prolongó cerca de <b>3 meses</b> (90 días)." },
+    { id: "vietnamwar", cat: "history", question: "¿Cuánto duró la guerra de Vietnam en su conjunto?", real: 631152000, displayUnit: "year",
+      fact: "El conflicto en Vietnam, desde sus inicios hasta la caída de Saigón, se prolongó cerca de <b>20 años</b>." },
+    { id: "panamacanal", cat: "history", question: "¿Cuánto tardó en construirse el Canal de Panamá, en su fase final liderada por Estados Unidos?", real: 315576000, displayUnit: "year",
+      fact: "La construcción del Canal de Panamá, en su fase estadounidense, llevó unos <b>10 años</b> (1904-1914)." },
+    { id: "eiffelconstruction", cat: "history", question: "¿Cuánto tardó en construirse la Torre Eiffel?", real: 69426720, displayUnit: "year",
+      fact: "La Torre Eiffel se construyó en poco más de <b>2 años</b>, entre 1887 y 1889, a tiempo para la Exposición Universal." },
+    { id: "statuelibertybuild", cat: "history", question: "¿Cuánto tardó en construirse la Estatua de la Libertad, en su fase de fabricación en Francia?", real: 284018400, displayUnit: "year",
+      fact: "La fabricación de la Estatua de la Libertad en Francia, antes de enviarla a Nueva York, llevó unos <b>9 años</b>." },
+    { id: "hooverdambuild", cat: "history", question: "¿Cuánto tardó en construirse la presa Hoover?", real: 157788000, displayUnit: "year",
+      fact: "La presa Hoover se construyó en unos <b>5 años</b>, entre 1931 y 1936, antes de lo previsto." },
+    { id: "suezcanalbuild", cat: "history", question: "¿Cuánto tardó en construirse el Canal de Suez?", real: 315576000, displayUnit: "year",
+      fact: "El Canal de Suez tardó unos <b>10 años</b> en construirse, entre 1859 y 1869." },
+    { id: "transatlanticcable", cat: "history", question: "¿Cuánto tardó en tenderse el primer cable telegráfico transatlántico permanente, en 1866?", real: 1209600, displayUnit: "day",
+      fact: "El tendido del cable telegráfico transatlántico de 1866, el primero duradero, llevó unas <b>2 semanas</b> de navegación." },
+    { id: "goldengatebuild", cat: "history", question: "¿Cuánto tardó en construirse el puente Golden Gate de San Francisco?", real: 135697680, displayUnit: "year",
+      fact: "El puente Golden Gate se construyó en algo más de <b>4 años</b>, entre 1933 y 1937." },
+    { id: "vikingage", cat: "history", question: "¿Cuánto duró la 'Era vikinga' habitualmente reconocida por los historiadores?", real: 8615224800, displayUnit: "year",
+      fact: "La Era vikinga se data convencionalmente entre el año 793 y 1066: unos <b>273 años</b> de expansión e incursiones nórdicas." },
+    { id: "mayaclassic", cat: "history", question: "¿Cuánto duró el periodo Clásico de la civilización maya?", real: 18934560000, displayUnit: "year",
+      fact: "El periodo Clásico maya, su época de mayor esplendor, se extendió durante unos <b>600 años</b>, entre el 250 y el 900 d.C." },
+    { id: "dialupmp3", cat: "tech", question: "¿Cuánto se tardaba en descargar una canción en MP3 con un módem de acceso telefónico (56k)?", real: 600, displayUnit: "min",
+      fact: "Descargar una canción MP3 de unos 4 MB con un módem de 56k podía tardar en torno a <b>10 minutos</b>." },
+    { id: "broadbandmovie", cat: "tech", question: "¿Cuánto se tarda en descargar una película en HD con una conexión de banda ancha doméstica actual?", real: 720, displayUnit: "min",
+      fact: "Con una conexión doméstica actual de banda ancha, descargar una película en HD puede tardar en torno a <b>12 minutos</b>." },
+    { id: "windowsupdate", cat: "tech", question: "¿Cuánto puede tardar la instalación de una actualización grande de Windows?", real: 2700, displayUnit: "min",
+      fact: "Una actualización mayor de funciones de Windows puede tardar entre 30 y 60 minutos en instalarse: unos <b>45 minutos</b> de media." },
+    { id: "iphonerestore", cat: "tech", question: "¿Cuánto puede tardar restaurar un iPhone completo desde una copia de seguridad?", real: 1800, displayUnit: "min",
+      fact: "Restaurar un iPhone entero desde una copia de seguridad en la nube suele tardar en torno a <b>30 minutos</b>." },
+    { id: "dvdlength", cat: "tech", question: "¿Cuánto dura de media el contenido de vídeo que cabe cómodamente en un DVD?", real: 7200, displayUnit: "h",
+      fact: "Un DVD estándar puede almacenar cómodamente en torno a <b>2 horas</b> de vídeo en buena calidad." },
+    { id: "bluraylength", cat: "tech", question: "¿Cuántas horas de vídeo en alta definición puede almacenar cómodamente un disco Blu-ray?", real: 14400, displayUnit: "h",
+      fact: "Un disco Blu-ray de capa simple puede almacenar hasta unas <b>4 horas</b> de vídeo en alta definición." },
+    { id: "powerbankcharge", cat: "tech", question: "¿Cuánto tarda en cargarse por completo una batería portátil (power bank) típica?", real: 14400, displayUnit: "h",
+      fact: "Cargar por completo una batería portátil típica desde un cargador estándar suele llevar unas <b>4 horas</b>." },
+    { id: "laptopbattery", cat: "tech", question: "¿Cuántas horas de autonomía tiene de media un portátil moderno con la batería llena?", real: 32400, displayUnit: "h",
+      fact: "Un portátil moderno de gama media ofrece de media unas <b>9 horas</b> de autonomía con la batería llena." },
+    { id: "evhomecharge", cat: "tech", question: "¿Cuánto tarda en cargarse un coche eléctrico enchufado a una toma doméstica normal durante la noche?", real: 28800, displayUnit: "h",
+      fact: "Cargando desde una toma doméstica convencional, un coche eléctrico puede tardar unas <b>8 horas</b> en completar la carga." },
+    { id: "bitcoinconfirm", cat: "tech", question: "¿Cuánto se tarda en considerar segura una transacción de Bitcoin, tras las confirmaciones recomendadas?", real: 3600, displayUnit: "h",
+      fact: "Con las 6 confirmaciones que suelen recomendarse, una transacción de Bitcoin tarda en considerarse segura en torno a <b>1 hora</b>." },
+    { id: "serverreboot", cat: "tech", question: "¿Cuánto suele tardar en reiniciarse por completo un ordenador o servidor típico?", real: 120, displayUnit: "min",
+      fact: "Un reinicio completo de un ordenador o servidor típico suele tardar en torno a <b>2 minutos</b>." },
+    { id: "phonelifespan", cat: "tech", question: "¿Cuántos años usa de media una persona su smartphone antes de cambiarlo?", real: 94672800, displayUnit: "year",
+      fact: "Un smartphone se usa de media unos <b>3 años</b> antes de ser reemplazado por uno nuevo." },
+    { id: "laptoplifespan", cat: "tech", question: "¿Cuántos años de vida útil tiene de media un portátil?", real: 157788000, displayUnit: "year",
+      fact: "Un portátil tiene una vida útil media de unos <b>5 años</b> antes de quedar obsoleto o fallar." },
+    { id: "patchcycle", cat: "tech", question: "¿Cada cuánto suelen publicar la mayoría de grandes empresas de software sus parches de seguridad rutinarios?", real: 2592000, displayUnit: "day",
+      fact: "Muchas grandes empresas de software siguen un ciclo de parches de seguridad rutinario de aproximadamente <b>1 mes</b>." },
+    { id: "shuttleturnaround", cat: "tech", question: "¿Cuánto tardaba de media en prepararse un transbordador espacial entre una misión y la siguiente?", real: 6480000, displayUnit: "day",
+      fact: "Entre misión y misión, un transbordador espacial necesitaba de media unos <b>75 días</b> de revisión y preparación." },
+    { id: "concordeflight", cat: "tech", question: "¿Cuánto tardaba el avión supersónico Concorde en cruzar el Atlántico entre Londres y Nueva York?", real: 12600, displayUnit: "h",
+      fact: "El Concorde cruzaba el Atlántico entre Londres y Nueva York en unas <b>3 horas y media</b>, la mitad de tiempo que un avión normal." },
+    { id: "consolegen", cat: "tech", question: "¿Cuánto suele durar de media una generación de consolas de videojuegos antes de que llegue la siguiente?", real: 205124400, displayUnit: "year",
+      fact: "Una generación de consolas suele durar de media entre 6 y 7 años antes de que llegue la siguiente: unos <b>6 años y medio</b>." },
+    { id: "androidsupport", cat: "tech", question: "¿Cuántos años de actualizaciones importantes de sistema operativo ha recibido tradicionalmente un móvil Android medio?", real: 78894000, displayUnit: "year",
+      fact: "Históricamente, un móvil Android medio ha recibido actualizaciones mayores de sistema operativo durante unos <b>2 años y medio</b>." },
+    { id: "rainbowduration", cat: "nature", question: "¿Cuánto puede durar visible en el cielo un arcoíris típico?", real: 1200, displayUnit: "min",
+      fact: "Un arcoíris suele ser visible durante unos <b>20 minutos</b> como mucho, mientras se dan las condiciones exactas de luz y lluvia." },
+    { id: "coralbleachrecover", cat: "nature", question: "¿Cuánto puede tardar un arrecife de coral en recuperarse de un episodio de blanqueamiento, si las condiciones lo permiten?", real: 315576000, displayUnit: "year",
+      fact: "Un arrecife de coral puede tardar hasta <b>10 años</b> en recuperarse de un episodio grave de blanqueamiento." },
+    { id: "forestregrowth", cat: "nature", question: "¿Cuánto puede tardar un bosque en regenerarse sustancialmente tras un gran incendio?", real: 788940000, displayUnit: "year",
+      fact: "Un bosque puede tardar entre 20 y 30 años en regenerarse de forma sustancial tras un gran incendio: unos <b>25 años</b> de media." },
+    { id: "earthprecession", cat: "nature", question: "¿Cuánto dura un ciclo completo de precesión del eje de la Tierra, el lento 'bamboleo' de su rotación?", real: 820497600000, displayUnit: "year",
+      fact: "El eje de la Tierra se bambolea muy lentamente, completando un ciclo de precesión cada <b>26.000 años</b> aproximadamente." },
+    { id: "supervolcanocycle", cat: "nature", question: "¿Cada cuánto han ocurrido históricamente las grandes erupciones del supervolcán de Yellowstone?", real: 22090320000000, displayUnit: "year",
+      fact: "Las grandes erupciones del supervolcán de Yellowstone se han producido históricamente cada <b>700.000 años</b> aproximadamente." },
+    { id: "amazonage", cat: "nature", question: "¿Cuántos años de antigüedad se estima que tiene como mínimo la selva amazónica?", real: 315576000000000, displayUnit: "year",
+      fact: "Se estima que la selva amazónica tiene al menos <b>10 millones de años</b> de antigüedad." },
+    { id: "coalformation", cat: "nature", question: "¿Cuánto puede tardar en formarse un yacimiento de carbón a partir de materia vegetal enterrada?", real: 9467280000000000, displayUnit: "year",
+      fact: "Los grandes yacimientos de carbón se formaron a partir de materia vegetal enterrada hace más de <b>300 millones de años</b>." },
+    { id: "oilformation", cat: "nature", question: "¿Cuánto tarda en formarse el petróleo crudo a partir de materia orgánica enterrada?", real: 315576000000000, displayUnit: "year",
+      fact: "El petróleo crudo tarda más de <b>10 millones de años</b> en formarse a partir de materia orgánica sometida a presión y calor." },
+    { id: "thunderstormcell", cat: "nature", question: "¿Cuánto dura de media una sola célula de tormenta eléctrica?", real: 1800, displayUnit: "min",
+      fact: "Una célula individual de tormenta eléctrica, desde que se forma hasta que se disipa, dura de media unos <b>30 minutos</b>." },
+    { id: "icebergmelt", cat: "nature", question: "¿Cuánto puede tardar en derretirse por completo un gran iceberg mientras deriva?", real: 78894000, displayUnit: "year",
+      fact: "Un gran iceberg desprendido de un glaciar puede tardar hasta <b>2 años y medio</b> en derretirse por completo mientras deriva por el océano." },
+    { id: "watercycleatmo", cat: "nature", question: "¿Cuánto tiempo pasa de media una molécula de agua en la atmósfera antes de precipitar?", real: 777600, displayUnit: "day",
+      fact: "Una molécula de agua evaporada permanece de media en la atmósfera unos <b>9 días</b> antes de volver a caer como precipitación." },
+    { id: "oceanconveyor", cat: "nature", question: "¿Cuánto puede tardar el agua en completar un ciclo por la gran circulación oceánica global (cinta transportadora termohalina)?", real: 31557600000, displayUnit: "year",
+      fact: "El agua de la circulación termohalina global puede tardar hasta <b>1.000 años</b> en completar un ciclo entero por todos los océanos." },
+    { id: "himalayasformation", cat: "nature", question: "¿Durante cuántos años llevan formándose los Himalayas por la colisión de placas tectónicas?", real: 1577880000000000, displayUnit: "year",
+      fact: "Los Himalayas llevan elevándose desde hace unos <b>50 millones de años</b>, por la colisión entre las placas india y euroasiática." },
+    { id: "f1racemax", cat: "sports", question: "¿Cuál es la duración máxima reglamentaria de una carrera de Fórmula 1?", real: 7200, displayUnit: "h",
+      fact: "El reglamento de la Fórmula 1 limita la duración de una carrera a un máximo de <b>2 horas</b> (salvo excepciones por interrupciones)." },
+    { id: "nbaplayoffseries", cat: "sports", question: "¿Cuánto puede durar una eliminatoria de playoffs de la NBA a siete partidos?", real: 1814400, displayUnit: "day",
+      fact: "Una eliminatoria de playoffs de la NBA al mejor de siete partidos puede alargarse hasta <b>3 semanas</b> con los días de descanso." },
+    { id: "worldseries", cat: "sports", question: "¿Cuánto suele durar la Serie Mundial de béisbol (MLB), al mejor de siete partidos?", real: 691200, displayUnit: "day",
+      fact: "La Serie Mundial de béisbol, al mejor de siete partidos, suele completarse en torno a <b>8 días</b>." },
+    { id: "grandslamtourney", cat: "sports", question: "¿Cuánto dura un torneo de tenis de Grand Slam, como Wimbledon?", real: 1209600, displayUnit: "day",
+      fact: "Un torneo de Grand Slam de tenis, como Wimbledon o Roland Garros, se disputa a lo largo de unas <b>2 semanas</b>." },
+    { id: "girogia", cat: "sports", question: "¿Cuánto dura el Giro de Italia, la gran vuelta ciclista?", real: 1814400, displayUnit: "day",
+      fact: "El Giro de Italia, como el Tour de Francia, se disputa a lo largo de unas <b>3 semanas</b> (21 etapas)." },
+    { id: "relay4x100", cat: "sports", question: "¿Cuánto dura una carrera de relevos 4x100 metros libres de natación a nivel de élite?", real: 190.2, displayUnit: "min",
+      fact: "El relevo 4x100 metros libres masculino de natación se completa a nivel de élite en algo más de <b>3 minutos</b>." },
+    { id: "racewalk20k", cat: "sports", question: "¿Cuál es aproximadamente el tiempo de élite en una carrera de marcha atlética de 20 km?", real: 4608, displayUnit: "h",
+      fact: "Los mejores marchadores del mundo completan los 20 km de marcha atlética en poco más de <b>1 hora y 15 minutos</b>." },
+    { id: "crickodi", cat: "sports", question: "¿Cuánto puede durar de juego efectivo un partido de críquet de un día (ODI)?", real: 28800, displayUnit: "h",
+      fact: "Un partido de críquet de un día (ODI) puede sumar unas <b>8 horas</b> de juego efectivo repartidas en una jornada completa." },
+    { id: "crickt20", cat: "sports", question: "¿Cuánto dura de media un partido de críquet en formato T20, el más corto?", real: 10800, displayUnit: "h",
+      fact: "El formato T20, el más corto y espectacular del críquet, dura de media unas <b>3 horas</b>." },
+    { id: "snookerframe", cat: "sports", question: "¿Cuánto dura de media un frame (manga) de snooker profesional?", real: 1200, displayUnit: "min",
+      fact: "Un frame de snooker profesional dura de media en torno a <b>20 minutos</b>." },
+    { id: "nflhalftime", cat: "sports", question: "¿Cuánto dura el descanso (halftime) en un partido normal de la NFL, sin contar la Super Bowl?", real: 720, displayUnit: "min",
+      fact: "En un partido normal de temporada regular de la NFL, el descanso dura <b>12 minutos</b> (frente a los más de 20 de la Super Bowl)." },
+    { id: "tennistiebreak", cat: "sports", question: "¿Cuánto suele durar un tie-break (muerte súbita) en un set de tenis?", real: 360, displayUnit: "min",
+      fact: "Un tie-break de tenis suele resolverse en unos <b>6 minutos</b> de juego." },
+    { id: "f1qualifying", cat: "sports", question: "¿Cuánto dura la sesión de clasificación de un Gran Premio de Fórmula 1?", real: 3600, displayUnit: "h",
+      fact: "La sesión de clasificación de un fin de semana de Fórmula 1, dividida en Q1, Q2 y Q3, dura en total <b>1 hora</b>." },
+    { id: "icecorerecord", cat: "nature", question: "¿Cuántos años de historia climática pueden registrar los núcleos de hielo más profundos de la Antártida?", real: 25246080000000, displayUnit: "year",
+      fact: "Los núcleos de hielo antárticos más profundos contienen un registro climático de hasta <b>800.000 años</b>." },
+    { id: "oldfaithful", cat: "nature", question: "¿Cada cuánto entra en erupción de media el géiser Old Faithful, en Yellowstone?", real: 5400, displayUnit: "min",
+      fact: "El géiser Old Faithful entra en erupción con bastante regularidad, cada <b>90 minutos</b> de media." },
+    { id: "saharacycle", cat: "nature", question: "¿Cada cuántos años el Sahara pasa por un ciclo de 'reverdecimiento', según los cambios orbitales de la Tierra?", real: 631152000000, displayUnit: "year",
+      fact: "Por los ciclos orbitales de Milankovitch, el Sahara alterna entre fases verdes y áridas cada unos <b>20.000 años</b>." },
+    { id: "permianrecovery", cat: "nature", question: "¿Cuánto tardó la biodiversidad en recuperarse tras la mayor extinción masiva de la historia, la del Pérmico?", real: 284018400000000, displayUnit: "year",
+      fact: "Tras la extinción masiva del Pérmico, la más severa conocida, la biodiversidad tardó unos <b>9 millones de años</b> en recuperarse." },
+    { id: "greatoxidation", cat: "nature", question: "¿Durante cuánto tiempo se prolongó el Gran Evento de Oxidación, cuando el oxígeno se acumuló en la atmósfera terrestre?", real: 9467280000000000, displayUnit: "year",
+      fact: "El Gran Evento de Oxidación se extendió durante unos <b>300 millones de años</b>, transformando por completo la atmósfera terrestre." },
+    { id: "lakebaikalage", cat: "nature", question: "¿Cuántos años de antigüedad se estima que tiene el lago Baikal, el más antiguo del mundo?", real: 788940000000000, displayUnit: "year",
+      fact: "El lago Baikal, en Siberia, es el lago más antiguo del planeta: se estima que tiene unos <b>25 millones de años</b>." },
+    { id: "tornadoduration", cat: "nature", question: "¿Cuánto suele durar en el suelo un tornado medio?", real: 600, displayUnit: "min",
+      fact: "Un tornado medio permanece en contacto con el suelo solo unos <b>10 minutos</b>, aunque los más intensos pueden durar más de una hora." },
+    { id: "sandstormduration", cat: "nature", question: "¿Cuánto puede durar una gran tormenta de arena o polvo en el desierto?", real: 86400, displayUnit: "h",
+      fact: "Una gran tormenta de arena puede prolongarse hasta <b>24 horas</b> o más, dependiendo de las condiciones de viento." },
+    { id: "saguarogrowth", cat: "nature", question: "¿Cuánto puede tardar un cactus saguaro en crecer solo 2,5 centímetros?", real: 315576000, displayUnit: "year",
+      fact: "El saguaro es uno de los cactus de crecimiento más lento: puede tardar <b>10 años</b> en crecer apenas 2,5 centímetros." },
+    { id: "ozoneholecycle", cat: "nature", question: "¿Cuánto suele durar cada año el ciclo de formación y cierre del agujero de ozono antártico?", real: 6480000, displayUnit: "day",
+      fact: "El agujero de ozono sobre la Antártida se forma y se cierra cada año en un ciclo estacional de unos <b>75 días</b>." },
+    { id: "kelpgrowth", cat: "nature", question: "¿Cuánto puede crecer en un solo día el alga kelp gigante, una de las plantas de crecimiento más rápido?", real: 86400, displayUnit: "h",
+      fact: "El kelp gigante puede crecer hasta 60 centímetros en un solo día, en apenas <b>24 horas</b>." },
+    { id: "deccantraps", cat: "nature", question: "¿Durante cuánto tiempo se prolongaron las erupciones volcánicas de los Traps del Decán, en la India?", real: 31557600000000, displayUnit: "year",
+      fact: "Las gigantescas erupciones volcánicas de los Traps del Decán se prolongaron durante aproximadamente <b>1 millón de años</b>." },
+    { id: "snowballearth", cat: "nature", question: "¿Cuánto se estima que duró uno de los episodios de 'Tierra bola de nieve', con el planeta casi totalmente congelado?", real: 378691200000000, displayUnit: "year",
+      fact: "Uno de los episodios de 'Tierra bola de nieve', con el planeta casi por completo cubierto de hielo, duró unos <b>12 millones de años</b>." },
+    { id: "renderframe", cat: "tech", question: "¿Cuánto podía tardar antiguamente renderizar un solo fotograma muy complejo de una película de animación 3D?", real: 86400, displayUnit: "h",
+      fact: "Algunos fotogramas especialmente complejos de películas de animación han llegado a tardar hasta <b>24 horas</b> en renderizarse por completo." },
+    { id: "aitrainingtime", cat: "tech", question: "¿Cuánto puede tardar en entrenarse un gran modelo de inteligencia artificial de última generación?", real: 1814400, displayUnit: "day",
+      fact: "Entrenar un gran modelo de lenguaje puede llevar varias semanas de cómputo continuo: en torno a <b>3 semanas</b> en muchos casos." },
+    { id: "fiberlatency", cat: "tech", question: "¿Cuánto tarda una señal de fibra óptica en cruzar Estados Unidos de costa a costa?", real: 0.022, displayUnit: "ms",
+      fact: "Una señal por fibra óptica puede cruzar Estados Unidos de costa a costa en unos <b>22 milisegundos</b>." },
+    { id: "satlatency", cat: "tech", question: "¿Cuánto tarda de ida y vuelta una señal de internet por satélite geoestacionario tradicional?", real: 0.6, displayUnit: "ms",
+      fact: "El internet por satélite geoestacionario tradicional tiene una latencia de ida y vuelta de unos <b>600 milisegundos</b>, muy superior a la fibra." },
+    { id: "appinstall", cat: "tech", question: "¿Cuánto se tarda de media en instalar una aplicación típica desde una tienda de apps con buena conexión wifi?", real: 30, displayUnit: "s",
+      fact: "Instalar una aplicación típica desde una tienda de apps con buena wifi suele tardar unos <b>30 segundos</b>." },
+    { id: "smartspeakerresponse", cat: "tech", question: "¿Cuánto tarda de media un altavoz inteligente en responder a un comando de voz?", real: 1.5, displayUnit: "ms",
+      fact: "Un altavoz inteligente suele responder a un comando de voz en <b>1 o 2 segundos</b>." },
+    { id: "ssdgameload", cat: "tech", question: "¿Cuánto tarda de media un videojuego en cargar en una consola moderna con disco SSD?", real: 7, displayUnit: "s",
+      fact: "Gracias al almacenamiento SSD, las consolas modernas cargan un videojuego en apenas <b>7 segundos</b> de media." },
+    { id: "ps1loadtime", cat: "tech", question: "¿Cuánto podía tardar un videojuego de la PlayStation original en cargar desde el CD-ROM?", real: 35, displayUnit: "s",
+      fact: "Cargar un videojuego desde el CD-ROM de la PlayStation original podía tardar entre 30 y 40 segundos: unos <b>35 segundos</b>." },
+    { id: "cloudbackupfull", cat: "tech", question: "¿Cuánto puede tardar la primera copia de seguridad completa de un ordenador en la nube?", real: 86400, displayUnit: "h",
+      fact: "La primera copia de seguridad completa de un ordenador en la nube puede tardar más de <b>24 horas</b>, según el volumen de datos y la conexión." },
+    { id: "printlarge3d", cat: "tech", question: "¿Cuánto puede tardar en imprimirse en 3D un objeto grande y detallado?", real: 108000, displayUnit: "h",
+      fact: "Un objeto grande y detallado impreso en 3D puede tardar más de <b>30 horas</b> de impresión continua." },
+    { id: "emaildelivery", cat: "tech", question: "¿Cuánto tarda de media un correo electrónico en llegar a la bandeja de entrada del destinatario?", real: 5, displayUnit: "s",
+      fact: "Un correo electrónico suele entregarse en la bandeja de entrada del destinatario en unos <b>5 segundos</b>." },
+    { id: "vrsetup", cat: "tech", question: "¿Cuánto se tarda de media en configurar por primera vez unas gafas de realidad virtual de habitación completa?", real: 1020, displayUnit: "min",
+      fact: "Configurar por primera vez unas gafas de realidad virtual, incluyendo el escaneo del espacio, suele llevar unos <b>17 minutos</b>." },
+    { id: "dronebattery", cat: "tech", question: "¿Cuánta autonomía de vuelo tiene de media un dron de cámara para consumidores con una carga?", real: 1620, displayUnit: "min",
+      fact: "Un dron de cámara típico para consumidores vuela de media unos <b>27 minutos</b> con una sola carga de batería." },
+    { id: "earbudscharge", cat: "tech", question: "¿Cuánto tardan en cargarse por completo unos auriculares inalámbricos dentro de su estuche?", real: 3600, displayUnit: "h",
+      fact: "Unos auriculares inalámbricos típicos se cargan por completo dentro de su estuche en aproximadamente <b>1 hora</b>." },
+    { id: "routerreboot", cat: "tech", question: "¿Cuánto tarda en reiniciarse por completo un router wifi doméstico?", real: 90, displayUnit: "min",
+      fact: "Un router wifi doméstico suele tardar en torno a <b>1 minuto y medio</b> en reiniciarse por completo y recuperar la conexión." },
+    { id: "laserprinterwarmup", cat: "tech", question: "¿Cuánto tarda una impresora láser de oficina en calentar e imprimir su primera página?", real: 12, displayUnit: "s",
+      fact: "Una impresora láser típica tarda entre 10 y 15 segundos en calentar e imprimir su primera página: unos <b>12 segundos</b>." },
+    { id: "eurovisionfinal", cat: "culture", question: "¿Cuánto dura la retransmisión de la final de Eurovisión?", real: 14400, displayUnit: "h",
+      fact: "La gala final de Eurovisión, con todas las actuaciones y la votación, dura alrededor de <b>4 horas</b>." },
+    { id: "comicconevent", cat: "culture", question: "¿Cuántos días dura la Comic-Con de San Diego?", real: 388800, displayUnit: "day",
+      fact: "La Comic-Con de San Diego se celebra a lo largo de unos <b>4 días y medio</b>, de jueves a domingo con preapertura." },
+    { id: "cannesfestival", cat: "culture", question: "¿Cuántos días dura el Festival de Cine de Cannes?", real: 1036800, displayUnit: "day",
+      fact: "El Festival de Cine de Cannes se celebra durante unos <b>12 días</b> cada mayo." },
+    { id: "macysparade", cat: "culture", question: "¿Cuánto dura la retransmisión del desfile de Acción de Gracias de Macy's en Nueva York?", real: 10800, displayUnit: "h",
+      fact: "El desfile de Acción de Gracias de Macy's se retransmite en directo durante unas <b>3 horas</b>." },
+    { id: "roseparade", cat: "culture", question: "¿Cuánto dura el desfile de las Rosas (Rose Parade) de Pasadena?", real: 7200, displayUnit: "h",
+      fact: "El famoso desfile de las Rosas de Pasadena, cada 1 de enero, dura unas <b>2 horas</b>." },
+    { id: "standupspecial", cat: "culture", question: "¿Cuánto dura de media un especial de monólogo cómico de una hora en las plataformas de streaming?", real: 3600, displayUnit: "h",
+      fact: "Pese a llamarse 'de una hora', un especial de comedia en streaming suele durar en torno a <b>1 hora</b> exacta de material." },
+    { id: "operaperformance", cat: "culture", question: "¿Cuánto dura de media una representación de ópera completa?", real: 10800, displayUnit: "h",
+      fact: "Una ópera completa, con sus actos y entreactos, dura de media unas <b>3 horas</b>." },
+    { id: "balletperformance", cat: "culture", question: "¿Cuánto dura de media una representación completa de ballet clásico?", real: 7200, displayUnit: "h",
+      fact: "Un ballet clásico completo, como El Lago de los Cisnes, dura de media unas <b>2 horas</b> con descansos." },
+    { id: "gamecompletion", cat: "culture", question: "¿Cuánto se tarda de media en completar la historia principal de un videojuego de un solo jugador?", real: 61200, displayUnit: "h",
+      fact: "Completar la historia principal de un videojuego típico de un jugador lleva de media unas <b>17 horas</b>." },
+    { id: "musicfestival", cat: "culture", question: "¿Cuántos días dura para el público un gran festival de música como Glastonbury?", real: 345600, displayUnit: "day",
+      fact: "Para el público asistente, un gran festival de música como Glastonbury dura unos <b>4 días</b>." },
+    { id: "nyefireworks", cat: "culture", question: "¿Cuánto dura de media un gran espectáculo de fuegos artificiales de Fin de Año?", real: 780, displayUnit: "min",
+      fact: "Un gran espectáculo de fuegos artificiales de Nochevieja dura de media unos <b>13 minutos</b>." },
+    { id: "marathonbroadcast", cat: "culture", question: "¿Cuánto dura de media la cobertura televisiva en directo de un maratón urbano importante?", real: 12600, displayUnit: "h",
+      fact: "La cobertura en directo de un gran maratón urbano, desde la salida hasta los últimos corredores de élite, dura unas <b>3 horas y media</b>." },
+    { id: "royalwedding", cat: "culture", question: "¿Cuánto duró la ceremonia de la boda real del príncipe Guillermo y Kate Middleton en 2011?", real: 3600, displayUnit: "h",
+      fact: "La ceremonia religiosa de la boda real de Guillermo y Catalina en la Abadía de Westminster duró en torno a <b>1 hora</b>." },
+    { id: "worldcupopening", cat: "culture", question: "¿Cuánto dura la ceremonia de apertura de un Mundial de fútbol?", real: 1800, displayUnit: "min",
+      fact: "La ceremonia de apertura de un Mundial de fútbol, antes del partido inaugural, dura unos <b>30 minutos</b>." },
+    { id: "frankfurtbookfair", cat: "culture", question: "¿Cuántos días dura la Feria del Libro de Fráncfort, la mayor del mundo?", real: 432000, displayUnit: "day",
+      fact: "La Feria del Libro de Fráncfort, la más importante del mundo editorial, se celebra durante <b>5 días</b>." },
+    { id: "fashionweek", cat: "culture", question: "¿Cuántos días dura una Semana de la Moda, como la de París?", real: 777600, displayUnit: "day",
+      fact: "Pese a llamarse 'semana', una Semana de la Moda como la de París suele durar en realidad unos <b>9 días</b>." },
+    { id: "spanishcivilwar", cat: "history", question: "¿Cuánto duró la Guerra Civil Española?", real: 94672800, displayUnit: "year",
+      fact: "La Guerra Civil Española se prolongó durante casi <b>3 años</b>, de 1936 a 1939." },
+    { id: "reconquista", cat: "history", question: "¿Cuánto duró la Reconquista de la península ibérica, desde el 711 hasta la toma de Granada?", real: 24646485600, displayUnit: "year",
+      fact: "La Reconquista se extendió durante <b>781 años</b>, desde el año 711 hasta la toma de Granada en 1492." },
+    { id: "greatdepression", cat: "history", question: "¿Cuánto duró la Gran Depresión económica mundial?", real: 315576000, displayUnit: "year",
+      fact: "La Gran Depresión se prolongó cerca de <b>10 años</b>, desde el crac de 1929 hasta el inicio de la recuperación a finales de los años 30." },
+    { id: "romanrepublic", cat: "history", question: "¿Cuánto duró la República Romana, antes de convertirse en Imperio?", real: 15210763200, displayUnit: "year",
+      fact: "La República Romana duró <b>482 años</b>, desde el 509 a.C. hasta el ascenso de Augusto en el 27 a.C." },
+    { id: "byzantineempire", cat: "history", question: "¿Cuánto duró el Imperio bizantino, la continuación oriental del Imperio Romano?", real: 31557600000, displayUnit: "year",
+      fact: "El Imperio bizantino sobrevivió cerca de <b>1.000 años</b> después de la caída de Roma, hasta 1453." },
+    { id: "ottomanempire", cat: "history", question: "¿Cuánto duró el Imperio otomano?", real: 19660384800, displayUnit: "year",
+      fact: "El Imperio otomano existió durante <b>623 años</b>, de 1299 a 1922." },
+    { id: "aztecempire", cat: "history", question: "¿Cuánto duró la Triple Alianza azteca, antes de la conquista española?", real: 2997972000, displayUnit: "year",
+      fact: "La Triple Alianza azteca gobernó durante unos <b>95 años</b>, de 1428 hasta la conquista española en 1521." },
+    { id: "incaempire", cat: "history", question: "¿Cuánto duró el Imperio inca como estado unificado, antes de la conquista española?", real: 3155760000, displayUnit: "year",
+      fact: "El Imperio inca existió como estado unificado durante apenas <b>100 años</b>, de mediados del siglo XV hasta 1533." },
+    { id: "plagueofathens", cat: "history", question: "¿Cuánto duró la Plaga de Atenas durante la Guerra del Peloponeso?", real: 157788000, displayUnit: "year",
+      fact: "La Plaga de Atenas, que diezmó la ciudad durante la Guerra del Peloponeso, se prolongó unos <b>5 años</b>." },
+    { id: "peloponnesianwar", cat: "history", question: "¿Cuánto duró la Guerra del Peloponeso entre Atenas y Esparta?", real: 852055200, displayUnit: "year",
+      fact: "La Guerra del Peloponeso entre Atenas y Esparta se prolongó durante <b>27 años</b>." },
+    { id: "punicwars", cat: "history", question: "¿Cuánto tiempo abarcaron en total las tres Guerras Púnicas entre Roma y Cartago?", real: 3723796800, displayUnit: "year",
+      fact: "Las tres Guerras Púnicas, con sus periodos de paz entre ellas, se extendieron a lo largo de <b>118 años</b>." },
+    { id: "crusadesperiod", cat: "history", question: "¿Durante cuántos años se sucedieron las Cruzadas a Tierra Santa?", real: 6311520000, displayUnit: "year",
+      fact: "La era de las Cruzadas se extendió a lo largo de unos <b>200 años</b>, entre 1095 y 1291." },
+    { id: "mongolexpansion", cat: "history", question: "¿Cuánto tardó el Imperio mongol en expandirse a su máxima extensión bajo Gengis Kan y sus sucesores inmediatos?", real: 788940000, displayUnit: "year",
+      fact: "El Imperio mongol se expandió hasta gran parte de su extensión máxima en apenas <b>25 años</b>." },
+    { id: "industrialrevolution", cat: "history", question: "¿Cuánto duró la (primera) Revolución Industrial?", real: 2524608000, displayUnit: "year",
+      fact: "La primera Revolución Industrial se extiende habitualmente entre 1760 y 1840: unos <b>80 años</b>." },
+    { id: "spanishflu", cat: "history", question: "¿Cuánto duró la pandemia de gripe española de 1918?", real: 63115200, displayUnit: "year",
+      fact: "La pandemia de gripe española se prolongó en varias olas durante unos <b>2 años</b>, de 1918 a 1920." },
+    { id: "berlinairlift", cat: "history", question: "¿Cuánto duró el Puente Aéreo de Berlín durante el bloqueo soviético de la ciudad?", real: 28512000, displayUnit: "day",
+      fact: "El Puente Aéreo de Berlín, que abasteció la ciudad por aire, se mantuvo durante <b>330 días</b>, casi 11 meses." },
+    { id: "vueltaespana", cat: "sports", question: "¿Cuántos días dura la Vuelta a España, la gran vuelta ciclista?", real: 1814400, displayUnit: "day",
+      fact: "La Vuelta a España, como las otras grandes vueltas ciclistas, se disputa a lo largo de unas <b>3 semanas</b>." },
+    { id: "handballmatch", cat: "sports", question: "¿Cuánto dura el tiempo de juego de un partido de balonmano?", real: 3600, displayUnit: "h",
+      fact: "Un partido de balonmano tiene dos partes de 30 minutos: <b>1 hora</b> de juego en total." },
+    { id: "volleyballmatch", cat: "sports", question: "¿Cuánto puede durar de media un partido de voleibol al mejor de cinco sets?", real: 7200, displayUnit: "h",
+      fact: "Un partido de voleibol al mejor de cinco sets dura de media alrededor de <b>2 horas</b>." },
+    { id: "waterpolomatch", cat: "sports", question: "¿Cuánto dura el tiempo de juego de un partido de waterpolo?", real: 1920, displayUnit: "min",
+      fact: "Un partido de waterpolo consta de cuatro periodos de 8 minutos: <b>32 minutos</b> de juego efectivo en total." },
+    { id: "badmintonmatch", cat: "sports", question: "¿Cuánto dura de media un partido de bádminton al mejor de tres juegos?", real: 2820, displayUnit: "min",
+      fact: "Un partido de bádminton al mejor de tres juegos dura de media unos <b>47 minutos</b>." },
+    { id: "tabletennismatch", cat: "sports", question: "¿Cuánto dura de media un partido de tenis de mesa al mejor de siete juegos?", real: 1800, displayUnit: "min",
+      fact: "Un partido de tenis de mesa al mejor de siete juegos dura de media unos <b>30 minutos</b>." },
+    { id: "marathonamateur", cat: "sports", question: "¿Cuánto tarda de media un corredor amateur en completar un maratón?", real: 16200, displayUnit: "h",
+      fact: "Un corredor amateur tarda de media en torno a <b>4 horas y media</b> en completar un maratón, muy lejos del récord mundial." },
+    { id: "triathlonolympic", cat: "sports", question: "¿Cuánto tarda de élite un triatlón en distancia olímpica (1,5 km natación, 40 km bici, 10 km carrera)?", real: 6300, displayUnit: "h",
+      fact: "Los triatletas de élite completan la distancia olímpica en algo menos de <b>1 hora y 45 minutos</b>." },
+    { id: "speedskating500m", cat: "sports", question: "¿Cuál es el récord mundial masculino de patinaje de velocidad en 500 metros?", real: 33.6, displayUnit: "s",
+      fact: "El récord mundial masculino de patinaje de velocidad sobre hielo en 500 metros baja de los <b>34 segundos</b>." },
+    { id: "trackcyclingsprint", cat: "sports", question: "¿Cuánto tarda un ciclista de élite en cubrir los últimos 200 metros de una prueba de velocidad en pista?", real: 9.5, displayUnit: "s",
+      fact: "En la prueba de velocidad de ciclismo en pista, los últimos 200 metros se cubren en unos <b>9,5 segundos</b> a nivel de élite." },
+    { id: "curlingmatch", cat: "sports", question: "¿Cuánto dura de media un partido de curling de 10 'ends'?", real: 9000, displayUnit: "h",
+      fact: "Un partido de curling de 10 ends dura de media unas <b>2 horas y media</b>." },
+    { id: "figureskatingfree", cat: "sports", question: "¿Cuánto dura el programa libre en patinaje artístico?", real: 240, displayUnit: "min",
+      fact: "El programa libre en patinaje artístico individual dura unos <b>4 minutos</b>." },
+    { id: "beachvolleyball", cat: "sports", question: "¿Cuánto dura de media un partido de vóley playa al mejor de tres sets?", real: 2700, displayUnit: "min",
+      fact: "Un partido de vóley playa al mejor de tres sets dura de media unos <b>45 minutos</b>." },
+    { id: "hubbleorbit", cat: "space", question: "¿Cuánto tarda el telescopio espacial Hubble en dar una vuelta a la Tierra?", real: 5700, displayUnit: "min",
+      fact: "El telescopio Hubble orbita la Tierra a baja altura y completa una vuelta cada <b>95 minutos</b>." },
+    { id: "marsdaststorm", cat: "space", question: "¿Cuánto puede durar una gran tormenta de polvo global en Marte?", real: 7776000, displayUnit: "day",
+      fact: "Las grandes tormentas de polvo que a veces envuelven todo Marte pueden durar hasta <b>3 meses</b>." },
+    { id: "venussuperrotation", cat: "space", question: "¿Cuánto tarda en dar una vuelta completa la atmósfera de Venus, mucho más rápido que el propio planeta?", real: 345600, displayUnit: "day",
+      fact: "Aunque Venus gira muy despacio, su atmósfera superior da una vuelta completa al planeta en solo <b>4 días</b> terrestres." },
+    { id: "issexpedition", cat: "space", question: "¿Cuánto dura de media una expedición de una tripulación en la Estación Espacial Internacional?", real: 15552000, displayUnit: "day",
+      fact: "Una expedición típica de un astronauta en la ISS dura unos <b>180 días</b>, medio año en órbita." },
+    { id: "artemis1", cat: "space", question: "¿Cuánto duró la misión no tripulada Artemis I alrededor de la Luna?", real: 2160000, displayUnit: "day",
+      fact: "La misión Artemis I, sin tripulación, completó su viaje alrededor de la Luna y vuelta en unos <b>25 días</b>." },
+    { id: "newhorizonspluto", cat: "space", question: "¿Cuánto tardó la sonda New Horizons en llegar a Plutón tras su lanzamiento?", real: 299797200, displayUnit: "year",
+      fact: "La sonda New Horizons tardó unos <b>9 años y medio</b> en llegar a Plutón tras su lanzamiento en 2006." },
+    { id: "cassinimission", cat: "space", question: "¿Cuánto tiempo orbitó Saturno la sonda Cassini antes de su zambullida final?", real: 410248800, displayUnit: "year",
+      fact: "La sonda Cassini orbitó Saturno y sus lunas durante unos <b>13 años</b> antes de sumergirse en la atmósfera del planeta." },
+    { id: "parkerprobeorbit", cat: "space", question: "¿Cuánto tarda la sonda Parker Solar Probe en completar su órbita más cercana al Sol?", real: 7603200, displayUnit: "day",
+      fact: "En sus órbitas más rápidas, la Parker Solar Probe completa una vuelta cercana al Sol en unos <b>88 días</b>." },
+    { id: "eclipsefrequency", cat: "space", question: "¿Cada cuánto es visible de media un eclipse solar total desde un punto concreto de la Tierra?", real: 11834100000, displayUnit: "year",
+      fact: "Desde un lugar concreto de la Tierra, un eclipse solar total es visible de media solo una vez cada <b>375 años</b> aproximadamente." },
+    { id: "marsopposition", cat: "space", question: "¿Cada cuánto se produce la 'oposición' de Marte, su punto de máximo acercamiento a la Tierra?", real: 69426720, displayUnit: "year",
+      fact: "Marte y la Tierra se alinean en su punto de máximo acercamiento (oposición) cada <b>26 meses</b> aproximadamente." },
+    { id: "headacheduration", cat: "body", question: "¿Cuánto dura de media un dolor de cabeza tensional típico?", real: 18000, displayUnit: "h",
+      fact: "Un dolor de cabeza tensional típico dura entre 4 y 6 horas: unas <b>5 horas</b> de media." },
+    { id: "blooddonationplasma", cat: "body", question: "¿Cuánto tarda el cuerpo en reponer el volumen de plasma tras una donación de sangre?", real: 86400, displayUnit: "h",
+      fact: "El cuerpo repone el volumen de plasma perdido en una donación de sangre en aproximadamente <b>24 horas</b>." },
+    { id: "tattoheal", cat: "body", question: "¿Cuánto tarda en curarse la superficie de la piel de un tatuaje nuevo?", real: 1512000, displayUnit: "day",
+      fact: "La superficie de un tatuaje nuevo tarda de media entre 2 y 3 semanas en curarse: unos <b>17-18 días</b>." },
+    { id: "brokenarmcast", cat: "body", question: "¿Cuánto tiempo suele llevar escayolado un brazo tras una fractura simple?", real: 4233600, displayUnit: "day",
+      fact: "Un brazo roto con una fractura simple suele llevar escayola durante unas <b>7 semanas</b> (49 días)." },
+    { id: "beestingswell", cat: "body", question: "¿Cuánto dura la hinchazón tras la picadura de una abeja?", real: 259200, displayUnit: "day",
+      fact: "La hinchazón y el enrojecimiento por una picadura de abeja suelen remitir en unos <b>3 días</b>." },
+    { id: "laryngitisduration", cat: "body", question: "¿Cuánto dura de media una laringitis (pérdida de voz por inflamación)?", real: 604800, displayUnit: "day",
+      fact: "Una laringitis leve suele resolverse por sí sola en aproximadamente <b>1 semana</b>." },
+    { id: "pinkeyeduration", cat: "body", question: "¿Cuánto dura de media una conjuntivitis vírica?", real: 864000, displayUnit: "day",
+      fact: "Una conjuntivitis vírica suele remitir por sí sola en torno a <b>10 días</b>." },
+    { id: "sprainedankle", cat: "body", question: "¿Cuánto tarda un esguince de tobillo leve en permitir retomar la actividad normal?", real: 1209600, displayUnit: "day",
+      fact: "Un esguince de tobillo leve suele necesitar unas <b>2 semanas</b> antes de poder retomar la actividad normal." },
+    { id: "spiderweb", cat: "animals", question: "¿Cuánto tarda una araña tejedora de telarañas en construir una tela completa?", real: 3600, displayUnit: "h",
+      fact: "Una araña tejedora puede construir una telaraña orbicular completa en aproximadamente <b>1 hora</b>." },
+    { id: "peacocktailregrow", cat: "animals", question: "¿Cuánto tarda un pavo real en regenerar su llamativa cola tras perderla en la muda anual?", real: 9072000, displayUnit: "day",
+      fact: "Un pavo real pierde su cola cada año y tarda unos <b>3 meses y medio</b> en regenerarla por completo." },
+    { id: "antlerregrow", cat: "animals", question: "¿Cuánto tarda un ciervo en regenerar por completo su cornamenta cada año?", real: 10368000, displayUnit: "day",
+      fact: "Los ciervos pierden y regeneran su cornamenta cada año: el nuevo crecimiento completo tarda unos <b>4 meses</b>." },
+    { id: "snakemolt", cat: "animals", question: "¿Cada cuánto muda de piel una serpiente adulta?", real: 3628800, displayUnit: "day",
+      fact: "Una serpiente adulta muda de piel cada <b>6 semanas</b> aproximadamente, según la especie y su crecimiento." },
+    { id: "beaverlifespan", cat: "animals", question: "¿Cuánto puede vivir un castor en libertad?", real: 757382400, displayUnit: "year",
+      fact: "Un castor puede vivir hasta <b>24 años</b> en libertad, mucho más de lo que se suele pensar." },
+    { id: "crowlifespan", cat: "animals", question: "¿Cuánto puede vivir un cuervo en libertad?", real: 536479200, displayUnit: "year",
+      fact: "Los cuervos son aves muy longevas e inteligentes: pueden vivir hasta <b>17 años</b> o más en libertad." },
+    { id: "goldfishlifespan", cat: "animals", question: "¿Cuánto puede vivir un pez de colores (carpín) bien cuidado?", real: 631152000, displayUnit: "year",
+      fact: "Un pez de colores bien cuidado, en un entorno adecuado, puede vivir más de <b>20 años</b>: mucho más de lo que sugiere su fama de mascota efímera." },
+    { id: "hedgehoghibernate", cat: "animals", question: "¿Cuánto puede durar la hibernación de un erizo en climas fríos?", real: 12096000, displayUnit: "day",
+      fact: "En climas fríos, un erizo puede hibernar hasta <b>140 días</b>, unos 4-5 meses." },
+    { id: "octopusbrooding", cat: "animals", question: "¿Cuánto puede pasar una hembra de pulpo cuidando sus huevos sin comer, en muchas especies comunes?", real: 13824000, displayUnit: "day",
+      fact: "En muchas especies comunes de pulpo, la hembra vigila sus huevos sin apenas comer durante unos <b>160 días</b>, hasta morir poco después de la eclosión." },
+    { id: "belugalifespan", cat: "animals", question: "¿Cuánto puede vivir una beluga (ballena blanca)?", real: 2524608000, displayUnit: "year",
+      fact: "Las belugas se encuentran entre los cetáceos más longevos: pueden vivir hasta <b>80 años</b>." },
+    { id: "orcalifespan", cat: "animals", question: "¿Cuánto puede vivir de media una orca en libertad?", real: 1577880000, displayUnit: "year",
+      fact: "Las orcas pueden vivir varias décadas en libertad, con hembras que a menudo superan los <b>50 años</b>." },
+  ];
+
+  /* ================= UNITS ================= */
+  var UNITS = ["ms", "s", "min", "h", "day", "year"];
+  var UNIT_LABEL = { ms: "ms", s: "s", min: "min", h: "h", day: "días", year: "años" };
+  var UNIT_FACTOR = { ms: 0.001, s: 1, min: 60, h: 3600, day: 86400, year: 31557600 };
+  var UNIT_DECIMALS = { ms: 0, s: 1, min: 1, h: 1, day: 0, year: 2 };
+  var STRIP_MIN = 0.0005;
+  var STRIP_MAX = 1000 * UNIT_FACTOR.year;
+
+  function clamp(x, lo, hi){ return Math.min(hi, Math.max(lo, x)); }
+  function round(v, d){ var m = Math.pow(10, d); return Math.round(v * m) / m; }
+
+  function bestUnitFor(seconds){
+    if (seconds >= UNIT_FACTOR.year) return "year";
+    if (seconds >= 72 * UNIT_FACTOR.h) return "day";
+    if (seconds >= UNIT_FACTOR.h) return "h";
+    if (seconds >= UNIT_FACTOR.min) return "min";
+    if (seconds >= UNIT_FACTOR.s) return "s";
+    return "ms";
+  }
+
+  function formatSeconds(seconds){
+    var u = bestUnitFor(seconds);
+    return round(seconds / UNIT_FACTOR[u], UNIT_DECIMALS[u]) + " " + UNIT_LABEL[u];
+  }
+
+  function formatInUnit(seconds, unit){
+    return round(seconds / UNIT_FACTOR[unit], UNIT_DECIMALS[unit]) + " " + UNIT_LABEL[unit];
+  }
+
+  function scoreFor(guessSeconds, realSeconds){
+    var ratio = guessSeconds > realSeconds ? guessSeconds / realSeconds : realSeconds / guessSeconds;
+    if (ratio <= 1.03) return 100;
+    return Math.max(0, Math.round(100 * (1 - Math.log(ratio) / Math.log(6))));
+  }
+
+  function tierFor(score){
+    if (score >= 90) return { cls: "tone-preciso", label: "muy preciso" };
+    if (score >= 70) return { cls: "tone-cerca", label: "cerca" };
+    if (score >= 40) return { cls: "tone-lejos", label: "lejos" };
+    return { cls: "tone-muylejos", label: "muy lejos" };
+  }
+
+  /* ================= STORAGE ================= */
+  var Storage = {
+    get: function(key, fallback){
+      try {
+        var raw = localStorage.getItem("cuantodura:" + key);
+        return raw === null ? fallback : JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set: function(key, value){
+      try { localStorage.setItem("cuantodura:" + key, JSON.stringify(value)); } catch (e) {}
+    }
+  };
+
+  /* ================= BACKEND (Supabase, sin login) ================= */
+  var SUPABASE_URL = "https://apjiuvclzexobpytdcte.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_1POYne2PWCNWGWewotPuVw_KqcuYFB8";
+  var GAME_ID = "cuanto-dura";
+
+  function uuidv4(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c){
+      var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function playerId(){
+    var id = Storage.get("player_id", null);
+    if (!id){ id = uuidv4(); Storage.set("player_id", id); }
+    return id;
+  }
+
+  var sbClient = (window.supabase && window.supabase.createClient)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
+
+  var Backend = {
+    available: function(){ return !!sbClient; },
+    getStreak: function(){
+      if (!sbClient) return Promise.resolve(null);
+      return sbClient.rpc("get_streak", { p_player_id: playerId(), p_game_id: GAME_ID })
+        .then(function(res){
+          if (res.error || !res.data || !res.data[0]) return null;
+          return { current: res.data[0].current_streak, best: res.data[0].best_streak };
+        })
+        .catch(function(){ return null; });
+    },
+    submitPlay: function(mode, category, dayKey, scores){
+      if (!sbClient) return Promise.resolve(null);
+      return sbClient.rpc("submit_play", {
+        p_player_id: playerId(), p_game_id: GAME_ID, p_mode: mode,
+        p_category: category, p_day_key: dayKey, p_scores: scores
+      })
+        .then(function(res){
+          if (res.error || !res.data || !res.data[0]) return null;
+          return res.data[0];
+        })
+        .catch(function(){ return null; });
+    }
+  };
+
+  /* ================= RANDOM / SHUFFLE ================= */
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function seededShuffle(arr, seed){
+    var rng = mulberry32(seed);
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(rng() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function hashStr(s){
+    var h = 0;
+    for (var i = 0; i < s.length; i++){ h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+    return h >>> 0;
+  }
+
+  /* ================= DAILY ================= */
+  var Daily = {
+    todayKey: function(){
+      var d = new Date();
+      var m = String(d.getMonth() + 1).padStart(2, "0");
+      var day = String(d.getDate()).padStart(2, "0");
+      return d.getFullYear() + "-" + m + "-" + day;
+    },
+    todayLabel: function(){
+      var d = new Date();
+      return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0");
+    },
+    getTodayRounds: function(){
+      var key = this.todayKey();
+      var seed = hashStr(key);
+      return seededShuffle(ROUNDS, seed).slice(0, 5);
+    }
+  };
+
+  /* ================= STREAK ================= */
+  var Streak = {
+    load: function(){
+      return Storage.get("streak", { current: 0, best: 0, lastDate: null });
+    },
+    registerToday: function(){
+      var key = Daily.todayKey();
+      var s = this.load();
+      if (s.lastDate === key) return s;
+      var yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      var yKey = yesterday.getFullYear() + "-" + String(yesterday.getMonth() + 1).padStart(2, "0") + "-" + String(yesterday.getDate()).padStart(2, "0");
+      s.current = (s.lastDate === yKey) ? s.current + 1 : 1;
+      s.best = Math.max(s.best, s.current);
+      s.lastDate = key;
+      Storage.set("streak", s);
+      return s;
+    }
+  };
+
+  /* ================= STATS (media global) ================= */
+  var Stats = {
+    load: function(){
+      return Storage.get("stats", { sum: 0, count: 0 });
+    },
+    registerScores: function(scores){
+      var st = this.load();
+      scores.forEach(function(sc){ st.sum += sc; st.count += 1; });
+      Storage.set("stats", st);
+      return st;
+    },
+    avg: function(){
+      var st = this.load();
+      return st.count ? Math.round(st.sum / st.count) : null;
+    }
+  };
+
+  /* ================= SHARE ================= */
+  var Share = {
+    squareFor: function(score){
+      if (score >= 90) return "🟩";
+      if (score >= 70) return "🟨";
+      if (score >= 40) return "🟧";
+      return "🟥";
+    },
+    buildText: function(scores, streak){
+      var squares = scores.map(this.squareFor).join("");
+      var avg = Math.round(scores.reduce(function(a,b){return a+b;}, 0) / scores.length);
+      var lines = ["¿Cuánto dura? · Diario " + Daily.todayLabel(), squares, "Media: " + avg + "/100"];
+      if (streak > 1) lines.push("Racha: " + streak + " 🔥");
+      return lines.join("\n");
+    },
+    copy: function(text){
+      function fallback(){
+        try {
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+          showToast("Copiado");
+        } catch (e) {}
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){ showToast("Copiado"); }).catch(fallback);
+      } else fallback();
+    }
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  var toastEl = $("toast"), toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 1800);
+  }
+
+  /* ================= VIEWS / ROUTER ================= */
+  var viewIds = ["home", "categories", "table", "faq", "play", "end"];
+  var elBack = $("btn-back"), elEyebrow = $("eyebrow"), elHud = $("hud");
+  var navStack = [];
+
+  var EYEBROWS = {
+    home: "Menú", categories: "Modo ilimitado", table: "Referencia",
+    faq: "Cómo se juega", play: "Jugando", end: "Resultado"
+  };
+
+  function showView(name, opts){
+    opts = opts || {};
+    viewIds.forEach(function(v){ $("view-" + v).hidden = (v !== name); });
+    elEyebrow.textContent = EYEBROWS[name] || "";
+    elBack.hidden = (name === "home");
+    elHud.hidden = (name !== "play");
+    if (!opts.noHistory){
+      if (navStack[navStack.length - 1] !== name) navStack.push(name);
+    }
+  }
+
+  elBack.addEventListener("click", function(){
+    navStack.pop();
+    var prev = navStack.pop() || "home";
+    showView(prev);
+  });
+
+  /* ================= HOME ================= */
+  function renderHome(){
+    var s = Streak.load();
+    $("home-streak").textContent = s.current;
+    $("home-best").textContent = s.best;
+    $("daily-date").textContent = Daily.todayLabel();
+
+    var avg = Stats.avg();
+    $("home-avg").textContent = avg === null ? "—" : avg;
+
+    var lp = Storage.get("lastPercentile", null);
+    var pEl = $("home-percentile");
+    if (lp && lp.total > 1){
+      pEl.innerHTML = "Último diario: superaste al <b>" + lp.percentile + "%</b> de " + lp.total + " jugadores";
+      pEl.hidden = false;
+    } else {
+      pEl.hidden = true;
+    }
+
+    Backend.getStreak().then(function(remote){
+      if (!remote) return;
+      Storage.set("streak", { current: remote.current, best: remote.best, lastDate: Streak.load().lastDate });
+      $("home-streak").textContent = remote.current;
+      $("home-best").textContent = remote.best;
+    });
+  }
+
+  $("btn-mode-daily").addEventListener("click", function(){
+    Game.start("daily", Daily.getTodayRounds(), null);
+  });
+
+  $("btn-mode-unlimited").addEventListener("click", function(){
+    renderCategories();
+    showView("categories");
+  });
+
+  $("btn-table").addEventListener("click", function(){ renderTable(); showView("table"); });
+  $("btn-faq").addEventListener("click", function(){ showView("faq"); });
+
+  /* ================= CATEGORIES ================= */
+  function renderCategories(){
+    var grid = $("cat-grid");
+    grid.innerHTML = "";
+
+    var allBtn = document.createElement("button");
+    allBtn.className = "cat-card all";
+    allBtn.innerHTML = '<span class="ce">🎲</span><span class="cn">Todas</span><span class="cc">' + ROUNDS.length + " duraciones</span>";
+    allBtn.addEventListener("click", function(){ Game.start("unlimited", shuffle(ROUNDS), null); });
+    grid.appendChild(allBtn);
+
+    var BADGE_COLORS = ["#fde7d8", "#dff5f0", "#fdefc7", "#e6e6fb", "#fde0e0", "#ddf0e4", "#e0f0fb", "#fbe7ef"];
+    CATEGORIES.forEach(function(c, i){
+      var count = ROUNDS.filter(function(r){ return r.cat === c.id; }).length;
+      var btn = document.createElement("button");
+      btn.className = "cat-card";
+      btn.style.setProperty("--badge-bg", BADGE_COLORS[i % BADGE_COLORS.length]);
+      btn.innerHTML = '<span class="ce">' + c.emoji + '</span><span class="cn">' + c.label + '</span><span class="cc">' + count + " duraciones</span>";
+      btn.addEventListener("click", function(){
+        Game.start("unlimited", shuffle(ROUNDS.filter(function(r){ return r.cat === c.id; })), c.id);
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  /* ================= REFERENCE TABLE ================= */
+  function renderTable(){
+    var panel = $("table-panel");
+    panel.innerHTML = "";
+    CATEGORIES.forEach(function(c){
+      var items = ROUNDS.filter(function(r){ return r.cat === c.id; }).slice().sort(function(a,b){ return a.real - b.real; });
+      if (!items.length) return;
+      var block = document.createElement("div");
+      block.className = "ref-cat";
+      var title = document.createElement("div");
+      title.className = "ref-cat-title";
+      title.textContent = c.emoji + " " + c.label;
+      block.appendChild(title);
+      items.forEach(function(r){
+        var row = document.createElement("div");
+        row.className = "ref-row";
+        var q = document.createElement("span"); q.className = "rq"; q.textContent = r.question;
+        var v = document.createElement("span"); v.className = "rv"; v.textContent = formatInUnit(r.real, r.displayUnit);
+        row.appendChild(q); row.appendChild(v);
+        block.appendChild(row);
+      });
+      panel.appendChild(block);
+    });
+  }
+
+  /* ================= GAME (play engine) ================= */
+  var Game = {
+    mode: null, list: [], categoryId: null, idx: 0, scores: [],
+    start: function(mode, list, categoryId){
+      this.mode = mode; this.list = list; this.categoryId = categoryId;
+      this.idx = 0; this.scores = [];
+      $("hud-total").textContent = list.length;
+      showView("play");
+      loadRound();
+    }
+  };
+
+  var r, revealed, dragging;
+  var currentUnit = "s";
+  var guessSeconds = 1;
+  var LOG_MIN = Math.log(STRIP_MIN), LOG_MAX = Math.log(STRIP_MAX);
+  var LN10 = Math.log(10);
+  var dragStartX = 0, dragStartLog = 0, dragTrackWidth = 1;
+
+  var elQuestion = $("question"), elChips = $("unit-chips"), elInput = $("num-input"), elSuffix = $("unit-suffix"),
+      elTrack = $("track"), elHandle = $("handle"), elBtnCheck = $("btn-check"), elBtnNext = $("btn-next"),
+      panelResult = $("panel-result"), hudRound = $("hud-round"), hudAvg = $("hud-avg"),
+      gaugeFill = $("gauge-fill"), gaugeNum = $("gauge-num"), gaugeLabel = $("gauge-label"),
+      gapRatio = $("gap-ratio"), gapFill = $("gap-fill"), gapGuess = $("gap-guess"), gapGuessTag = $("gap-guess-tag"),
+      gapReal = $("gap-real"), gapRealTag = $("gap-real-tag"), factEl = $("fact"),
+      endNum = $("end-num"), summaryList = $("summary-list");
+
+  UNITS.forEach(function(u){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "unit-chip"; b.textContent = UNIT_LABEL[u]; b.dataset.unit = u;
+    b.addEventListener("click", function(){ setUnit(u); });
+    elChips.appendChild(b);
+  });
+
+  function refreshChips(){
+    Array.prototype.forEach.call(elChips.children, function(b){ b.classList.toggle("active", b.dataset.unit === currentUnit); });
+    elSuffix.textContent = UNIT_LABEL[currentUnit];
+  }
+
+  function setUnit(u){
+    if (revealed) return;
+    currentUnit = u;
+    setGuessFromSeconds(1 * UNIT_FACTOR[currentUnit]);
+    elInput.value = round(1, UNIT_DECIMALS[currentUnit]);
+    refreshChips();
+  }
+
+  function secToPct(s){ return clamp((Math.log(s) - LOG_MIN) / (LOG_MAX - LOG_MIN), 0, 1); }
+
+  function setGuessFromSeconds(s){
+    guessSeconds = clamp(s, STRIP_MIN, STRIP_MAX);
+    elHandle.style.left = (secToPct(guessSeconds) * 100) + "%";
+  }
+
+  function setGuessSecondsAndUnit(s){
+    setGuessFromSeconds(s);
+    currentUnit = bestUnitFor(guessSeconds);
+    // Redondeamos al mismo valor que se muestra en pantalla y lo usamos también
+    // para puntuar: así lo que el jugador ve ("6 días") es exactamente lo que
+    // se compara con la respuesta real, sin desajustes de precisión ocultos.
+    var displayVal = round(guessSeconds / UNIT_FACTOR[currentUnit], UNIT_DECIMALS[currentUnit]);
+    elInput.value = displayVal;
+    guessSeconds = clamp(displayVal * UNIT_FACTOR[currentUnit], STRIP_MIN, STRIP_MAX);
+    elHandle.style.left = (secToPct(guessSeconds) * 100) + "%";
+    refreshChips();
+  }
+
+  elInput.addEventListener("input", function(){
+    if (revealed) return;
+    var v = parseFloat(elInput.value);
+    if (isNaN(v) || v <= 0) return;
+    setGuessFromSeconds(v * UNIT_FACTOR[currentUnit]);
+  });
+
+  function loadRound(){
+    r = Game.list[Game.idx];
+    revealed = false; dragging = false;
+    elQuestion.textContent = r.question;
+    elInput.disabled = false;
+    elInput.classList.remove("revealed");
+    elHandle.classList.remove("revealed");
+    currentUnit = "s";
+    setGuessSecondsAndUnit(1);
+    panelResult.classList.remove("show");
+    elBtnCheck.hidden = false;
+    hudRound.textContent = Game.idx + 1;
+  }
+
+  function logOfGuess(){ return Math.log(guessSeconds); }
+  function setGuessFromLog(logv){ setGuessSecondsAndUnit(Math.exp(clamp(logv, LOG_MIN, LOG_MAX))); }
+
+  elTrack.addEventListener("pointerdown", function(e){
+    if (revealed) return;
+    dragging = true;
+    elTrack.setPointerCapture(e.pointerId);
+    dragStartX = e.clientX;
+    dragStartLog = logOfGuess();
+    dragTrackWidth = Math.max(1, elTrack.getBoundingClientRect().width);
+  });
+  elTrack.addEventListener("pointermove", function(e){
+    if (!dragging || revealed) return;
+    var deltaPx = e.clientX - dragStartX;
+    var decadesPerFullWidth = e.shiftKey ? 1.2 : 6;
+    var deltaLog = (deltaPx / dragTrackWidth) * decadesPerFullWidth * LN10;
+    setGuessFromLog(dragStartLog + deltaLog);
+  });
+  elTrack.addEventListener("pointerup", function(){ dragging = false; });
+  elTrack.addEventListener("pointercancel", function(){ dragging = false; });
+
+  elTrack.addEventListener("wheel", function(e){
+    if (revealed) return;
+    e.preventDefault();
+    var step = (e.shiftKey ? 0.015 : 0.045) * LN10;
+    setGuessFromLog(logOfGuess() + (e.deltaY < 0 ? step : -step));
+  }, { passive: false });
+
+  elTrack.addEventListener("keydown", function(e){
+    if (revealed) return;
+    var step = (e.shiftKey ? 0.015 : 0.05) * LN10;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp"){ setGuessFromLog(logOfGuess() + step); e.preventDefault(); }
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown"){ setGuessFromLog(logOfGuess() - step); e.preventDefault(); }
+    else if (e.key === "Enter"){ check(); e.preventDefault(); }
+  });
+
+  elInput.addEventListener("keydown", function(e){ if (e.key === "Enter"){ check(); e.preventDefault(); } });
+  elBtnCheck.addEventListener("click", check);
+
+  function check(){
+    if (revealed) return;
+    var v = parseFloat(elInput.value);
+    if (isNaN(v) || v <= 0) return;
+    revealed = true;
+    elBtnCheck.hidden = true;
+    elInput.disabled = true;
+    elInput.classList.add("revealed");
+    elHandle.classList.add("revealed");
+
+    var score = scoreFor(guessSeconds, r.real);
+    Game.scores.push(score);
+    var tier = tierFor(score);
+
+    var CIRC = 220;
+    gaugeFill.setAttribute("class", "gauge-fill " + tier.cls);
+    gaugeFill.style.stroke = "currentColor";
+    requestAnimationFrame(function(){ gaugeFill.style.strokeDashoffset = String(CIRC * (1 - score / 100)); });
+    gaugeLabel.textContent = tier.label;
+
+    var startN = null, durN = 700;
+    function frameN(ts){
+      if (!startN) startN = ts;
+      var t = Math.min(1, (ts - startN) / durN);
+      var eased = 1 - Math.pow(1 - t, 3);
+      gaugeNum.textContent = Math.round(score * eased);
+      if (t < 1) requestAnimationFrame(frameN);
+    }
+    requestAnimationFrame(frameN);
+
+    var ratio = guessSeconds > r.real ? guessSeconds / r.real : r.real / guessSeconds;
+    gapRatio.innerHTML = ratio <= 1.05
+      ? "prácticamente exacto"
+      : "tu estimación estaba <b>×" + round(ratio, ratio < 10 ? 1 : 0) + "</b> " + (guessSeconds > r.real ? "por encima" : "por debajo");
+
+    var lo = Math.min(guessSeconds, r.real) / 2.5;
+    var hi = Math.max(guessSeconds, r.real) * 2.5;
+    function barPct(v){ return clamp((Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)), 0, 1); }
+    var gp = barPct(guessSeconds), rp = barPct(r.real);
+
+    gapGuess.style.left = (gp * 100) + "%";
+    gapReal.style.left = (rp * 100) + "%";
+    gapGuessTag.textContent = "tú: " + formatSeconds(guessSeconds);
+    gapRealTag.textContent = "real: " + formatInUnit(r.real, r.displayUnit);
+
+    var lo2 = Math.min(gp, rp) * 100, hi2 = Math.max(gp, rp) * 100;
+    gapFill.style.left = lo2 + "%";
+    gapFill.style.width = (hi2 - lo2) + "%";
+
+    requestAnimationFrame(function(){
+      gapFill.style.transform = "scaleX(1)";
+      gapGuess.classList.add("show");
+      setTimeout(function(){ gapReal.classList.add("show"); }, 200);
+    });
+
+    factEl.innerHTML = r.fact;
+
+    var avg = Math.round(Game.scores.reduce(function(a,b){return a+b;}, 0) / Game.scores.length);
+    hudAvg.textContent = avg;
+
+    panelResult.classList.add("show");
+  }
+
+  elBtnNext.addEventListener("click", function(){
+    Game.idx++;
+    if (Game.idx >= Game.list.length) finishGame();
+    else loadRound();
+  });
+
+  /* ================= END ================= */
+  function finishGame(){
+    var avg = Math.round(Game.scores.reduce(function(a,b){return a+b;}, 0) / Game.scores.length);
+    endNum.textContent = avg;
+    Stats.registerScores(Game.scores);
+
+    summaryList.innerHTML = "";
+    Game.list.forEach(function(rr, i){
+      var row = document.createElement("div");
+      row.className = "summary-row";
+      var q = document.createElement("span"); q.className = "q"; q.textContent = rr.question;
+      var s = document.createElement("span"); s.className = "s"; s.textContent = Game.scores[i];
+      row.appendChild(q); row.appendChild(s);
+      summaryList.appendChild(row);
+    });
+
+    var buttons = $("end-buttons");
+    buttons.innerHTML = "";
+    var streakStrip = $("end-streak-strip");
+
+    if (Game.mode === "daily"){
+      var s = Streak.registerToday();
+      var streakForShare = s.current;
+      $("end-streak").textContent = s.current;
+      $("end-best").textContent = s.best;
+      streakStrip.hidden = false;
+
+      var shareBtn = document.createElement("button");
+      shareBtn.className = "btn-primary";
+      shareBtn.textContent = "Compartir resultado";
+      shareBtn.addEventListener("click", function(){ Share.copy(Share.buildText(Game.scores, streakForShare)); });
+      buttons.appendChild(shareBtn);
+
+      Backend.submitPlay("daily", null, Daily.todayKey(), Game.scores).then(function(remote){
+        if (!remote) return;
+        streakForShare = remote.current_streak;
+        $("end-streak").textContent = remote.current_streak;
+        $("end-best").textContent = remote.best_streak;
+        Storage.set("streak", { current: remote.current_streak, best: remote.best_streak, lastDate: Daily.todayKey() });
+        if (remote.percentile !== null && remote.percentile !== undefined && remote.total_players){
+          var pEl = $("end-percentile");
+          pEl.innerHTML = remote.total_players > 1
+            ? "Hoy superaste al <b>" + remote.percentile + "%</b> de " + remote.total_players + " jugadores"
+            : "Eres el primer jugador de hoy — vuelve mañana para comparar";
+          pEl.hidden = false;
+          if (remote.total_players > 1){
+            Storage.set("lastPercentile", { percentile: remote.percentile, total: remote.total_players, dayKey: Daily.todayKey() });
+          }
+        }
+      });
+
+      var homeBtn = document.createElement("button");
+      homeBtn.className = "btn-secondary";
+      homeBtn.textContent = "Menú";
+      homeBtn.addEventListener("click", function(){ renderHome(); showView("home", { noHistory: true }); navStack = ["home"]; });
+      buttons.appendChild(homeBtn);
+    } else {
+      streakStrip.hidden = true;
+
+      var againBtn = document.createElement("button");
+      againBtn.className = "btn-primary";
+      againBtn.textContent = "Jugar otra vez";
+      againBtn.addEventListener("click", function(){
+        var pool = Game.categoryId ? ROUNDS.filter(function(r2){ return r2.cat === Game.categoryId; }) : ROUNDS;
+        Game.start("unlimited", shuffle(pool), Game.categoryId);
+      });
+      buttons.appendChild(againBtn);
+
+      var catBtn = document.createElement("button");
+      catBtn.className = "btn-secondary";
+      catBtn.textContent = "Elegir otra categoría";
+      catBtn.addEventListener("click", function(){ renderCategories(); showView("categories", { noHistory: true }); navStack = ["home", "categories"]; });
+      buttons.appendChild(catBtn);
+
+      var homeBtn2 = document.createElement("button");
+      homeBtn2.className = "btn-secondary";
+      homeBtn2.textContent = "Menú";
+      homeBtn2.addEventListener("click", function(){ renderHome(); showView("home", { noHistory: true }); navStack = ["home"]; });
+      buttons.appendChild(homeBtn2);
+    }
+
+    showView("end");
+  }
+
+  /* ================= INIT ================= */
+  renderHome();
+  showView("home");
+})();
+</script>

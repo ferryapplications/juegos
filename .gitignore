@@ -1,0 +1,6 @@
+.DS_Store
+Claude outputs/
+*.log
+node_modules/
+cuanto-dura/diseno-claude-code.html
+cuanto-dura/handoff-diseno-para-cowork.md
