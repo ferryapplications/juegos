@@ -14,3 +14,7 @@ Prototipos de juegos de estimación y percepción.
 ## Publicación
 
 La web se sirve vía GitHub Pages desde la raíz de `main`.
+
+## Apps nativas
+
+`cuanto-dura/` incluye un proyecto [Capacitor](https://capacitorjs.com) (`android/`, `ios/`) que envuelve el mismo `index.html`. Ver `cuanto-dura/README.md` para desarrollo local. CI de compilación en `.github/workflows/android.yml` e `ios.yml`.

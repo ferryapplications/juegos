@@ -1,0 +1,19 @@
+{
+  "name": "cuanto-dura",
+  "version": "1.0.0",
+  "description": "Juego de estimación de duración — app nativa vía Capacitor",
+  "main": "index.js",
+  "scripts": {
+    "sync": "mkdir -p www && cp index.html www/index.html && npx cap sync"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2"
+  }
+}

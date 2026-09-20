@@ -1,0 +1,43 @@
+name: Android build (Cuánto Dura)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cuanto-dura/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cuanto-dura
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sync web assets into native project
+        run: npm run sync
+
+      - name: Build debug APK
+        working-directory: cuanto-dura/android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: cuanto-dura-debug-apk
+          path: cuanto-dura/android/app/build/outputs/apk/debug/app-debug.apk

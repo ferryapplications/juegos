@@ -1,0 +1,39 @@
+name: iOS build (Cuánto Dura)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cuanto-dura/**'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: cuanto-dura
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Sync web assets into native project
+        run: npm run sync
+
+      - name: Install CocoaPods dependencies
+        working-directory: cuanto-dura/ios/App
+        run: pod install
+
+      - name: Build for simulator (sin firma, solo validación)
+        working-directory: cuanto-dura/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -sdk iphonesimulator -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO build
