@@ -32,7 +32,7 @@ jobs:
           echo "exit code: $code"
           cat /tmp/sync.log
           if [ $code -ne 0 ]; then
-            BODY=$(node -e "const fs=require('fs');console.log(JSON.stringify({body:'iOS sync log:\n\n\`\`\`\n'+fs.readFileSync('/tmp/sync.log','utf8').slice(-6000)+'\n\`\`\`'}))")
+            BODY=$(node -e "const fs=require('fs');console.log(JSON.stringify({body:'iOS sync log:' + String.fromCharCode(10) + fs.readFileSync('/tmp/sync.log','utf8').slice(-6000)}))")
             curl -sS -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/comments" -d "$BODY"
           fi
           exit $code
